@@ -638,6 +638,7 @@
                             <th>Issue Date</th>
                             <th>Storage Temp</th>
                             <th>Humidity</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="inventoryTableBody">
@@ -995,7 +996,7 @@ const kpiStored = document.getElementById('kpiStored');
     const showIssuedBtn = document.getElementById('showIssuedBtn');
     const showStoredBtn = document.getElementById('showStoredBtn');
     
-    // DOM Elements for Archive
+// DOM Elements for Archive
 const archiveBtn = document.getElementById('archiveBtn');
 const archiveDropdown = document.getElementById('archiveDropdown');
 const uploadBtn = document.getElementById('uploadBtn');
@@ -1016,14 +1017,21 @@ const renameFormContainer = document.getElementById('renameFormContainer');
 const newFileName = document.getElementById('newFileName');
 const confirmRenameBtn = document.getElementById('confirmRenameBtn');
 
-// Sample files data (in a real app, this would come from your backend)
-let files = [
-    { id: 1, name: 'Component_Specs.pdf', description: 'Component specifications document', date: '2023-05-15' },
-    { id: 2, name: 'Storage_Guidelines.docx', description: 'Storage guidelines for components', date: '2023-06-20' },
-    { id: 3, name: 'Issue_Log_2023.xlsx', description: 'Component issue log for 2023', date: '2023-07-10' }
-];
-
+let files = [];
 let selectedFileForRename = null;
+
+// Load files from server
+async function loadArchiveFiles() {
+    try {
+        const response = await fetch('http://localhost:3000/api/archive/files');
+        if (response.ok) {
+            files = await response.json();
+            console.log('Files loaded:', files);
+        }
+    } catch (error) {
+        console.error('Error loading files:', error);
+    }
+}
 
 // Toggle dropdown
 archiveBtn.addEventListener('click', function(e) {
@@ -1073,7 +1081,7 @@ window.addEventListener('click', function(event) {
 });
 
 // Show archive modal with specific section
-function showArchiveModal(section) {
+async function showArchiveModal(section) {
     archiveModal.style.display = 'block';
     document.getElementById('archiveModalTitle').textContent = 
         section.charAt(0).toUpperCase() + section.slice(1) + ' Files';
@@ -1088,7 +1096,8 @@ function showArchiveModal(section) {
     // Show the selected section
     document.getElementById(section + 'Section').style.display = 'block';
     
-    // Populate file lists if needed
+    // Load files and populate lists
+    await loadArchiveFiles();
     if (section === 'delete') {
         populateDeleteFileList();
     } else if (section === 'rename') {
@@ -1107,138 +1116,158 @@ function resetArchiveModal() {
 // Populate delete file list
 function populateDeleteFileList() {
     deleteFileList.innerHTML = '';
+    if (files.length === 0) {
+        deleteFileList.innerHTML = '<li class="file-item">No files found</li>';
+        return;
+    }
+    
     files.forEach(file => {
         const li = document.createElement('li');
         li.className = 'file-item';
         li.innerHTML = `
-            <span>${file.name} - ${file.description}</span>
-            <button class="file-action-btn delete" data-id="${file.id}">Delete</button>
+            <span>${file.name}</span>
+            <button class="file-action-btn delete" onclick="deleteFile('${file.name}')">Delete</button>
         `;
         deleteFileList.appendChild(li);
-    });
-    
-    // Add delete event listeners
-    document.querySelectorAll('#deleteFileList .file-action-btn.delete').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const fileId = parseInt(this.getAttribute('data-id'));
-            deleteFile(fileId);
-        });
     });
 }
 
 // Populate rename file list
 function populateRenameFileList() {
     renameFileList.innerHTML = '';
+    if (files.length === 0) {
+        renameFileList.innerHTML = '<li class="file-item">No files found</li>';
+        return;
+    }
+    
     files.forEach(file => {
         const li = document.createElement('li');
         li.className = 'file-item';
         li.innerHTML = `
-            <span>${file.name} - ${file.description}</span>
-            <button class="file-action-btn" data-id="${file.id}">Rename</button>
+            <span>${file.name}</span>
+            <button class="file-action-btn" onclick="startRenameFile('${file.name}')">Rename</button>
         `;
         renameFileList.appendChild(li);
-    });
-    
-    // Add rename event listeners
-    document.querySelectorAll('#renameFileList .file-action-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const fileId = parseInt(this.getAttribute('data-id'));
-            startRenameFile(fileId);
-        });
     });
 }
 
 // Populate view file list
 function populateViewFileList() {
     viewFileList.innerHTML = '';
+    if (files.length === 0) {
+        viewFileList.innerHTML = '<li class="file-item">No files found</li>';
+        return;
+    }
+    
     files.forEach(file => {
         const li = document.createElement('li');
         li.className = 'file-item';
         li.innerHTML = `
             <div>
                 <strong>${file.name}</strong>
-                <p>${file.description}</p>
-                <small>Uploaded: ${file.date}</small>
+                <p>Size: ${(file.size / 1024).toFixed(2)} KB</p>
+                <small>Uploaded: ${new Date(file.uploadDate).toLocaleString()}</small>
             </div>
             <div class="file-actions">
-                <button class="file-action-btn" data-id="${file.id}">View</button>
-                <button class="file-action-btn" data-id="${file.id}">Download</button>
+                <button class="file-action-btn" onclick="viewFile('${file.name}')">View</button>
             </div>
         `;
         viewFileList.appendChild(li);
     });
-    
-    // Add view/download event listeners
-    document.querySelectorAll('#viewFileList .file-action-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const fileId = parseInt(this.getAttribute('data-id'));
-            const action = this.textContent.toLowerCase();
-            handleFileAction(fileId, action);
-        });
-    });
 }
 
 // Start renaming a file
-function startRenameFile(fileId) {
-    const file = files.find(f => f.id === fileId);
-    if (file) {
-        selectedFileForRename = file;
-        newFileName.value = file.name;
-        renameFormContainer.style.display = 'block';
-    }
+function startRenameFile(filename) {
+    selectedFileForRename = filename;
+    newFileName.value = filename;
+    renameFormContainer.style.display = 'block';
 }
 
 // Confirm rename
-confirmRenameBtn.addEventListener('click', function() {
+confirmRenameBtn.addEventListener('click', async function() {
     if (selectedFileForRename && newFileName.value.trim()) {
-        selectedFileForRename.name = newFileName.value.trim();
-        populateRenameFileList();
-        renameFormContainer.style.display = 'none';
-        selectedFileForRename = null;
-        alert('File renamed successfully!');
+        try {
+            const response = await fetch('http://localhost:3000/api/archive/rename', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    oldName: selectedFileForRename,
+                    newName: newFileName.value.trim()
+                })
+            });
+            
+            if (response.ok) {
+                alert('File renamed successfully!');
+                await loadArchiveFiles();
+                populateRenameFileList();
+                renameFormContainer.style.display = 'none';
+                selectedFileForRename = null;
+            } else {
+                alert('Failed to rename file');
+            }
+        } catch (error) {
+            console.error('Rename error:', error);
+            alert('Failed to rename file');
+        }
     }
 });
 
 // Delete a file
-function deleteFile(fileId) {
+async function deleteFile(filename) {
     if (confirm('Are you sure you want to delete this file?')) {
-        files = files.filter(f => f.id !== fileId);
-        populateDeleteFileList();
-        alert('File deleted successfully!');
-    }
-}
-
-// Handle view/download actions
-function handleFileAction(fileId, action) {
-    const file = files.find(f => f.id === fileId);
-    if (file) {
-        if (action === 'view') {
-            alert(`Viewing file: ${file.name}\nDescription: ${file.description}`);
-        } else if (action === 'download') {
-            alert(`Downloading file: ${file.name}`);
-            // In a real app, this would initiate a download
+        try {
+            const response = await fetch(`http://localhost:3000/api/archive/files/${filename}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                alert('File deleted successfully!');
+                await loadArchiveFiles();
+                populateDeleteFileList();
+            } else {
+                alert('Failed to delete file');
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            alert('Failed to delete file');
         }
     }
 }
 
+// View file
+function viewFile(filename) {
+    window.open(`http://localhost:3000/uploads/${filename}`, '_blank');
+}
+
 // Upload form submission
-uploadForm.addEventListener('submit', function(e) {
+uploadForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     const fileInput = document.getElementById('fileToUpload');
     const description = document.getElementById('fileDescription').value;
     
     if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const newFile = {
-            id: files.length + 1,
-            name: file.name,
-            description: description || 'No description provided',
-            date: new Date().toISOString().split('T')[0]
-        };
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('description', description);
         
-        files.push(newFile);
-        alert('File uploaded successfully!');
-        uploadForm.reset();
+        try {
+            const response = await fetch('http://localhost:3000/api/archive/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            if (response.ok) {
+                alert('File uploaded successfully!');
+                uploadForm.reset();
+                await loadArchiveFiles();
+            } else {
+                alert('Upload failed: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert('Failed to upload file');
+        }
     }
 });
     
@@ -1308,6 +1337,7 @@ uploadForm.addEventListener('submit', function(e) {
             <td><input type="number" name="quantity_each[]" min="1"></td>
             <td><input type="number" name="total_quantity[]" min="1" required></td>
             <td><input type="text" name="so_no[]"></td>
+            <td><input type="file" name="soPdf[]" accept="application/pdf"/></td>
             <td><input type="date" name="issue_date[]" required></td>
         `;
         componentsTableBody.appendChild(newRow);
@@ -1366,6 +1396,7 @@ uploadForm.addEventListener('submit', function(e) {
                 <td><input type="number" name="quantity_each[]" min="1"></td>
                 <td><input type="number" name="total_quantity[]" min="1" required></td>
                 <td><input type="text" name="so_no[]"></td>
+                <td><input type="file" name="soPdf[]" accept="application/pdf"/></td> 
                 <td><input type="date" name="issue_date[]" required></td>
             </tr>
         `;
@@ -1411,121 +1442,167 @@ uploadForm.addEventListener('submit', function(e) {
     });
 
     // Issue form submission
-    issueForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(issueForm);
-        const components = [];
-        
-        // Get all component rows
-        const rows = componentsTableBody.querySelectorAll('tr');
-        rows.forEach((row, index) => {
-            const inputs = row.querySelectorAll('input');
-            if (inputs[2].value.trim()) { // Check if part number is filled
-                const component = {
-                    serialNo: inputs[0].value,
-                    snoSO: inputs[1].value,
-                    partNo: inputs[2].value,
-                    partDescription: inputs[3].value,
-                    manufacturer: inputs[4].value,
-                    qualityGrade: inputs[5].value,
-                    subSystem: inputs[6].value,
-                    quantityEach: inputs[7].value || 1,
-                    totalQuantity: inputs[8].value,
-                    soNo: inputs[9].value,
-                    issueDate: inputs[10].value
-                };
-                components.push(component);
-            }
-        });
-        
-        const issueData = {
-            issueNo: document.getElementById('issueNo').value,
-            issueDate: document.getElementById('issueDate').value,
-            requestText: document.getElementById('requestType').value,
-            issueTo: document.getElementById('issueTo').value,
-            issueFor: document.getElementById('issueFor').value,
-            systemManager: document.getElementById('systemManager').value,
-            components: components
-        };
-        
-        try {
-            const response = await fetch('http://localhost:3000/api/issue', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(issueData)
-            });
+// Issue form submission with file upload support
+issueForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    
+    // Add header fields
+    formData.append('issueNo', document.getElementById('issueNo').value);
+    formData.append('issueDate', document.getElementById('issueDate').value);
+    formData.append('requestText', document.getElementById('requestType').value);
+    formData.append('issueTo', document.getElementById('issueTo').value);
+    formData.append('issueFor', document.getElementById('issueFor').value);
+    formData.append('systemManager', document.getElementById('systemManager').value);
+    formData.append('submittedBy', currentUser ? currentUser.name : 'Unknown');
+    
+    // Get all component rows
+    const rows = componentsTableBody.querySelectorAll('tr');
+    const components = [];
+    
+    rows.forEach((row, index) => {
+        const inputs = row.querySelectorAll('input');
+        if (inputs[2].value.trim()) { // Check if part number is filled
+            const component = {
+                serialNo: inputs[0].value,
+                snoSO: inputs[1].value,
+                partNo: inputs[2].value,
+                partDescription: inputs[3].value,
+                manufacturer: inputs[4].value,
+                qualityGrade: inputs[5].value,
+                subSystem: inputs[6].value,
+                quantityEach: inputs[7].value || 1,
+                totalQuantity: inputs[8].value,
+                soNo: inputs[9].value,
+                issueDate: inputs[11].value
+            };
             
-            if (response.ok) {
-                alert('Components issued successfully!');
-                issueModal.style.display = 'none';
-                issueForm.reset();
-                resetComponentRows();
-                await loadInventory();
-            } else {
-                alert('Failed to issue components');
+            // Handle PDF file upload
+            const fileInput = inputs[10]; // The file input
+            if (fileInput.files && fileInput.files[0]) {
+                formData.append(`soPdf_${index}`, fileInput.files[0]);
+                component.hasPdf = true;
+                component.pdfIndex = index;
             }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Connection error. Please try again.');
+            
+            components.push(component);
         }
     });
-
-    // Storage form submission
-    storageForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
+    
+    // Add components as JSON string
+    formData.append('components', JSON.stringify(components));
+    
+    try {
+        let response;
+        const isEditMode = issueForm.dataset.editMode === 'true';
         
-        const components = [];
-        const rows = storageTableBody.querySelectorAll('tr');
+        if (isEditMode) {
+            const componentId = issueForm.dataset.editingId;
+            formData.append('editMode', 'true');
+            formData.append('componentId', componentId);
+        }
         
-        rows.forEach((row) => {
-            const inputs = row.querySelectorAll('input');
-            if (inputs[2].value.trim()) { // Check if part number is filled
-                const component = {
-                    serialNo: inputs[0].value,
-                    snoPO: inputs[1].value,
-                    partNo: inputs[2].value,
-                    partDescription: inputs[3].value,
-                    grade: inputs[4].value,
-                    quantity: inputs[5].value,
-                    storageTemp: inputs[6].value,
-                    relativeHumidity: inputs[7].value,
-                    storageData: inputs[8].value,
-                    deliveryDate: inputs[9].value
-                };
-                components.push(component);
-            }
+        // Send as multipart/form-data (no Content-Type header - browser sets it automatically)
+        response = await fetch('http://localhost:3000/api/issue', {
+            method: 'POST',
+            body: formData
         });
         
-        const storageData = {
-            storageNo: document.getElementById('storageNo').value,
-            storageDate: document.getElementById('storageDate').value,
-            soNumber: document.getElementById('soNumber').value,
-            systemManager: document.getElementById('storageSystemManager').value,
-            components: components
-        };
+        if (response.ok) {
+            const result = await response.json();
+            alert(result.message || (isEditMode ? 'Component updated successfully!' : 'Components issued successfully!'));
+            issueModal.style.display = 'none';
+            issueForm.reset();
+            delete issueForm.dataset.editingId;
+            delete issueForm.dataset.editMode;
+            resetComponentRows();
+            await loadInventory();
+        } else {
+            const error = await response.json();
+            alert('Failed: ' + (error.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Connection error. Please try again.');
+    }
+});
+
+    // Storage form submission
+    // Storage form submission
+storageForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const components = [];
+    const rows = storageTableBody.querySelectorAll('tr');
+    
+    rows.forEach((row) => {
+        const inputs = row.querySelectorAll('input');
+        if (inputs[2].value.trim()) { // Check if part number is filled
+            const component = {
+                serialNo: inputs[0].value,
+                snoPO: inputs[1].value,
+                partNo: inputs[2].value,
+                partDescription: inputs[3].value,
+                grade: inputs[4].value,
+                quantity: inputs[5].value,
+                storageTemp: inputs[6].value,
+                relativeHumidity: inputs[7].value,
+                storageData: inputs[8].value,
+                deliveryDate: inputs[9].value
+            };
+            components.push(component);
+        }
+    });
+    
+    const storageData = {
+        storageNo: document.getElementById('storageNo').value,
+        storageDate: document.getElementById('storageDate').value,
+        soNumber: document.getElementById('soNumber').value,
+        systemManager: document.getElementById('storageSystemManager').value,
+        components: components,
+        submittedBy: currentUser ? currentUser.name : 'Unknown'
+    };
+    
+    try {
+        let response;
+        const isEditMode = storageForm.dataset.editMode === 'true';
         
-        try {
-            const response = await fetch('http://localhost:3000/api/storage', {
+        if (isEditMode) {
+            // UPDATE mode
+            const componentId = storageForm.dataset.editingId;
+            response = await fetch(`http://localhost:3000/api/components/${componentId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(storageData)
+            });
+        } else {
+            // CREATE mode
+            response = await fetch('http://localhost:3000/api/storage', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(storageData)
             });
-            
-            if (response.ok) {
-                alert('Components stored successfully!');
-                storageModal.style.display = 'none';
-                storageForm.reset();
-                resetStorageRows();
-                await loadInventory();
-            } else {
-                alert('Failed to store components');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Connection error. Please try again.');
         }
-    });
+        
+        if (response.ok) {
+            const result = await response.json();
+            alert(result.message || (isEditMode ? 'Component updated successfully!' : 'Components stored successfully!'));
+            storageModal.style.display = 'none';
+            storageForm.reset();
+            delete storageForm.dataset.editingId;
+            delete storageForm.dataset.editMode;
+            resetStorageRows();
+            await loadInventory();
+        } else {
+            const error = await response.json();
+            alert('Failed: ' + (error.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Connection error. Please try again.');
+    }
+});
 
     // View toggle buttons
     showAllBtn.addEventListener('click', function() {
@@ -1654,35 +1731,48 @@ async function loadInventory() {
 
 
     // Update table with data
-    function updateTable(data) {
-        inventoryTableBody.innerHTML = '';
-        data.forEach(item => {
-            const row = document.createElement('tr');
-            
-            // Common fields
-            row.innerHTML = `
-                <td>${item['Component ID'] || '-'}</td>
-                <td>${item.Name || item['Part Description'] || '-'}</td>
-                <td>${item.Type || 'Issued Component'}</td>
-                <td>${item.Status || 'Issued'}</td>
-                <td>${item.Date || item['Issue Date'] || '-'}</td>
-                <td>${item['Issued To'] || '-'}</td>
-                <td>${item['SO No'] || item['SO Number'] || '-'}</td>
-                <td>${item['Issue Date'] || '-'}</td>
+    // Update table with data
+function updateTable(data) {
+    inventoryTableBody.innerHTML = '';
+    data.forEach(item => {
+        const row = document.createElement('tr');
+        
+        // Common fields
+        row.innerHTML = `
+            <td>${item['Component ID'] || '-'}</td>
+            <td>${item.Name || item['Part Description'] || '-'}</td>
+            <td>${item.Type || 'Issued Component'}</td>
+            <td>${item.Status || 'Issued'}</td>
+            <td>${item.Date || item['Issue Date'] || '-'}</td>
+            <td>${item['Issued To'] || '-'}</td>
+            <td>${item['SO No'] || item['SO Number'] || '-'}</td>
+            <td>${item['Issue Date'] || '-'}</td>
+        `;
+        
+        // Add storage-specific fields
+        const storageTempCell = document.createElement('td');
+        storageTempCell.textContent = item['Storage Temperature'] || '-';
+        row.appendChild(storageTempCell);
+        
+        const humidityCell = document.createElement('td');
+        humidityCell.textContent = item['Relative Humidity'] || '-';
+        row.appendChild(humidityCell);
+        
+        // Add action buttons cell - ONLY FOR PENDING STATUS
+        const actionsCell = document.createElement('td');
+        if (item.Status && item.Status.toLowerCase() === 'pending') {
+            actionsCell.innerHTML = `
+                <button class="file-action-btn" onclick="editComponent('${item['Component ID']}')">Edit</button>
+                <button class="file-action-btn delete" onclick="deleteComponent('${item['Component ID']}')">Delete</button>
             `;
-            
-            // Add storage-specific fields
-            const storageTempCell = document.createElement('td');
-            storageTempCell.textContent = item['Storage Temperature'] || '-';
-            row.appendChild(storageTempCell);
-            
-            const humidityCell = document.createElement('td');
-            humidityCell.textContent = item['Relative Humidity'] || '-';
-            row.appendChild(humidityCell);
-            
-            inventoryTableBody.appendChild(row);
-        });
-    }
+        } else {
+            actionsCell.textContent = '-';
+        }
+        row.appendChild(actionsCell);
+        
+        inventoryTableBody.appendChild(row);
+    });
+}
 
     // Show dashboard
     async function showDashboard() {
@@ -1704,6 +1794,154 @@ async function loadInventory() {
             quantityHeader.textContent="Total quantity of EM";
         }
     }
+
+    // Edit Component Function
+async function editComponent(componentId) {
+    try {
+        // Fetch the component details
+        const response = await fetch(`http://localhost:3000/api/components/${componentId}`);
+        if (!response.ok) {
+            alert('Failed to fetch component details');
+            return;
+        }
+        
+        const component = await response.json();
+        
+        // Check if it's an issued or stored component
+        if (component['Issue No']) {
+            // It's an issued component - open issue modal with data
+            await populateIssueModal(component);
+        } else if (component['Storage No']) {
+            // It's a storage component - open storage modal with data
+            await populateStorageModal(component);
+        }
+        
+    } catch (error) {
+        console.error('Error editing component:', error);
+        alert('Failed to load component for editing');
+    }
+}
+
+// Populate Issue Modal with existing data
+async function populateIssueModal(component) {
+    // Fetch all components with same Issue No
+    const response = await fetch('http://localhost:3000/api/inventory');
+    const allData = await response.json();
+    const relatedComponents = allData.filter(item => 
+        item['Issue No'] === component['Issue No']
+    );
+    
+    // Open modal
+    issueModal.style.display = 'block';
+    setTimeout(() => initSignatureCanvas('issueSignatureCanvas'), 100);
+    
+    // Populate header fields
+    document.getElementById('issueNo').value = component['Issue No'] || '';
+    document.getElementById('issueDate').value = component['Issue Date'] || '';
+    document.getElementById('requestType').value = component['Request Text'] || '';
+    document.getElementById('issueTo').value = component['Issued To'] || '';
+    document.getElementById('issueFor').value = component['Issue For'] || '';
+    document.getElementById('systemManager').value = component['System Manager'] || '';
+    
+    // Clear and populate component rows
+    componentsTableBody.innerHTML = '';
+    componentRowCount = 0;
+    
+    relatedComponents.forEach((comp, index) => {
+        componentRowCount++;
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td><input type="text" name="sno[]" value="${componentRowCount}" readonly></td>
+            <td><input type="text" name="sno_so[]" value="${comp['S.No as per SO'] || ''}"></td>
+            <td><input type="text" name="part_no[]" value="${comp['Part No'] || ''}" required></td>
+            <td><input type="text" name="part_desc[]" value="${comp['Part Description'] || ''}" required></td>
+            <td><input type="text" name="manufacturer[]" value="${comp['Manufacturer'] || ''}"></td>
+            <td><input type="text" name="quality_grade[]" value="${comp['Quality Grade'] || ''}"></td>
+            <td><input type="text" name="sub_system[]" value="${comp['Sub System'] || ''}"></td>
+            <td><input type="number" name="quantity_each[]" value="${comp['Quantity Each'] || 1}" min="1"></td>
+            <td><input type="number" name="total_quantity[]" value="${comp['Total Quantity'] || 1}" min="1" required></td>
+            <td><input type="text" name="so_no[]" value="${comp['SO No'] || ''}"></td>
+            <td><input type="file" name="soPdf[]" accept="application/pdf"/></td>
+            <td><input type="date" name="issue_date[]" value="${comp['Issue Date'] || ''}" required></td>
+        `;
+        componentsTableBody.appendChild(newRow);
+    });
+    
+    // Store the component ID for update
+    issueForm.dataset.editingId = component['Component ID'];
+    issueForm.dataset.editMode = 'true';
+}
+
+// Populate Storage Modal with existing data
+async function populateStorageModal(component) {
+    // Fetch all components with same Storage No
+    const response = await fetch('http://localhost:3000/api/inventory');
+    const allData = await response.json();
+    const relatedComponents = allData.filter(item => 
+        item['Storage No'] === component['Storage No']
+    );
+    
+    // Open modal
+    storageModal.style.display = 'block';
+    setTimeout(() => initSignatureCanvas('storageSignatureCanvas'), 100);
+    
+    // Populate header fields
+    document.getElementById('storageNo').value = component['Storage No'] || '';
+    document.getElementById('storageDate').value = component['Storage Date'] || '';
+    document.getElementById('soNumber').value = component['SO Number'] || '';
+    document.getElementById('storageSystemManager').value = component['System Manager'] || '';
+    
+    // Clear and populate storage rows
+    storageTableBody.innerHTML = '';
+    storageRowCount = 0;
+    
+    relatedComponents.forEach((comp, index) => {
+        storageRowCount++;
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td><input type="text" name="storage_sno[]" value="${storageRowCount}" readonly></td>
+            <td><input type="text" name="sno_po[]" value="${comp['S.No as per PO'] || ''}"></td>
+            <td><input type="text" name="storage_part_no[]" value="${comp['Part No'] || ''}" required></td>
+            <td><input type="text" name="storage_part_desc[]" value="${comp['Part Description'] || ''}" required></td>
+            <td><input type="text" name="grade[]" value="${comp['Grade'] || ''}"></td>
+            <td><input type="number" name="storage_quantity[]" value="${comp['Storage Quantity'] || 1}" min="1" required></td>
+            <td><input type="text" name="storage_temp[]" value="${comp['Storage Temperature'] || ''}"></td>
+            <td><input type="text" name="relative_humidity[]" value="${comp['Relative Humidity'] || ''}"></td>
+            <td><input type="date" name="storage_data[]" value="${comp['Storage Data'] || ''}"></td>
+            <td><input type="date" name="delivery_date[]" value="${comp['Delivery Date'] || ''}"></td>
+        `;
+        storageTableBody.appendChild(newRow);
+    });
+    
+    // Store the component ID for update
+    storageForm.dataset.editingId = component['Component ID'];
+    storageForm.dataset.editMode = 'true';
+}
+
+// Delete Component Function
+async function deleteComponent(componentId) {
+    if (!confirm('Are you sure you want to delete this component? This will delete all related entries.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`http://localhost:3000/api/components/${componentId}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            alert(result.message || 'Component deleted successfully!');
+            await loadInventory();
+        } else {
+            const error = await response.json();
+            alert('Failed to delete: ' + (error.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error deleting component:', error);
+        alert('Failed to delete component');
+    }
+}
 
     // Digital Signature functionality
 let isDrawing = false;

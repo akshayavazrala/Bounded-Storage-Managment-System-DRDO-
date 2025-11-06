@@ -3,56 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bonded Stores Management System</title>
+<title>User Login - Bonded Stores</title>
 <style>
-/* Base Styles */
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', Arial, sans-serif; }
 body { background-color: #f5f5f5; color: #333; line-height: 1.6; }
 
-/* Auth Page Styles */
 .auth-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #4285F4; }
 .auth-box { background-color: white; padding: 2.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
 .auth-box h1 { color: #4285F4; margin-bottom: 1.5rem; font-size: 1.8rem; }
+.auth-box .subtitle { color: #555; font-size: 0.9rem; margin-bottom: 1rem; font-weight: 500; }
 
-/* Tabs with indicator */
 .auth-tabs { display: flex; position: relative; margin-bottom: 1.2rem; border-bottom: 1px solid #e0e0e0; user-select: none; }
 .auth-tab { flex: 1; padding: 0.8rem 0; cursor: pointer; font-weight: 500; color: #555; text-align: center; }
 .auth-tab.active { color: #4285F4; }
 .tab-indicator { position: absolute; bottom: 0; left: 0; width: 50%; height: 3px; background: #4285F4; border-radius: 2px; transform: translateX(0); transition: transform 280ms cubic-bezier(.2,.9,.2,1); }
 .auth-tabs.signup-active .tab-indicator { transform: translateX(100%); }
 
-/* Forms */
 .auth-form { display: flex; flex-direction: column; }
 .form-group { margin-bottom: 1.2rem; text-align: left; }
 .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #555; }
 .form-group input { width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; transition: border-color 0.3s; }
 .form-group input:focus { border-color: #4285F4; outline: none; }
 
-/* Buttons */
 .auth-btn { background-color: #FBBC05; color: #202124; border: none; padding: 0.8rem; border-radius: 4px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: background-color 0.3s; margin-top: 0.5rem; }
 .auth-btn:hover { background-color: #F9AB00; }
+.auth-btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
-/* Switch link */
 .auth-switch { margin-top: 1.5rem; font-size: 0.9rem; color: #555; text-align: center; }
 .auth-switch a { color: #4285F4; text-decoration: none; font-weight: 500; }
 .auth-switch a:hover { text-decoration: underline; }
+
+.error-message { background-color: #FEE; color: #C00; padding: 0.8rem; border-radius: 4px; margin-bottom: 1rem; font-size: 0.9rem; display: none; }
+.success-message { background-color: #EFE; color: #0A0; padding: 0.8rem; border-radius: 4px; margin-bottom: 1rem; font-size: 0.9rem; display: none; }
 </style>
 </head>
 <body>
 
-<!-- Auth Page -->
 <div class="auth-container" id="authPage">
     <div class="auth-box">
-        <h1>Bonded Stores Management System</h1>
+        <h1>Bonded Stores Management</h1>
+        <div class="subtitle">User Portal</div>
 
-        <!-- Tabs -->
+        <div id="errorMsg" class="error-message"></div>
+        <div id="successMsg" class="success-message"></div>
+
         <div class="auth-tabs" id="authTabs">
             <div class="auth-tab active" id="loginTab">Login</div>
             <div class="auth-tab" id="signupTab">Sign Up</div>
             <div class="tab-indicator"></div>
         </div>
 
-        <!-- Login Form -->
         <form class="auth-form" id="loginForm" style="display:block;">
             <div class="form-group">
                 <label for="username">Username</label>
@@ -62,23 +62,22 @@ body { background-color: #f5f5f5; color: #333; line-height: 1.6; }
                 <label for="password">Password</label>
                 <input type="password" id="password" placeholder="Enter your password" required>
             </div>
-            <button type="submit" class="auth-btn">Login</button>
+            <button type="submit" class="auth-btn" id="loginBtn">Login</button>
             <div class="auth-switch">
                 Don't have an account? <a href="#" id="showSignup">Sign up</a>
             </div>
         </form>
 
-        <!-- Signup Form -->
         <form class="auth-form" id="signupForm" style="display:none;">
             <div class="form-group">
                 <label for="newUsername">Username</label>
-                <input type="text" id="newUsername" placeholder="Choose a username" required>
+                <input type="text" id="newUsername" placeholder="Choose a username (min 3 chars)" required minlength="3">
             </div>
             <div class="form-group">
                 <label for="newPassword">Password</label>
-                <input type="password" id="newPassword" placeholder="Choose a password" required>
+                <input type="password" id="newPassword" placeholder="Choose a password (min 4 chars)" required minlength="4">
             </div>
-            <button type="submit" class="auth-btn">Sign Up</button>
+            <button type="submit" class="auth-btn" id="signupBtn">Sign Up</button>
             <div class="auth-switch">
                 Already have an account? <a href="#" id="showLogin">Login</a>
             </div>
@@ -87,6 +86,8 @@ body { background-color: #f5f5f5; color: #333; line-height: 1.6; }
 </div>
 
 <script>
+const API_URL = 'http://localhost:3000';
+
 document.addEventListener('DOMContentLoaded', () => {
     const authTabs = document.getElementById('authTabs');
     const loginTab = document.getElementById('loginTab');
@@ -95,6 +96,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const signupForm = document.getElementById('signupForm');
     const showSignupLink = document.getElementById('showSignup');
     const showLoginLink = document.getElementById('showLogin');
+    const errorMsg = document.getElementById('errorMsg');
+    const successMsg = document.getElementById('successMsg');
+
+    function showError(message) {
+        errorMsg.textContent = message;
+        errorMsg.style.display = 'block';
+        successMsg.style.display = 'none';
+        setTimeout(() => { errorMsg.style.display = 'none'; }, 5000);
+    }
+
+    function showSuccess(message) {
+        successMsg.textContent = message;
+        successMsg.style.display = 'block';
+        errorMsg.style.display = 'none';
+        setTimeout(() => { successMsg.style.display = 'none'; }, 3000);
+    }
 
     function activateLogin() {
         loginTab.classList.add('active');
@@ -102,6 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
         authTabs.classList.remove('signup-active');
         loginForm.style.display = 'block';
         signupForm.style.display = 'none';
+        errorMsg.style.display = 'none';
+        successMsg.style.display = 'none';
     }
 
     function activateSignup() {
@@ -110,6 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
         authTabs.classList.add('signup-active');
         signupForm.style.display = 'block';
         loginForm.style.display = 'none';
+        errorMsg.style.display = 'none';
+        successMsg.style.display = 'none';
     }
 
     loginTab.addEventListener('click', activateLogin);
@@ -117,14 +138,102 @@ document.addEventListener('DOMContentLoaded', () => {
     showSignupLink.addEventListener('click', (e) => { e.preventDefault(); activateSignup(); });
     showLoginLink.addEventListener('click', (e) => { e.preventDefault(); activateLogin(); });
 
-    loginForm.addEventListener('submit', (e) => {
+    // USER LOGIN
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        window.location.href = "user_update.html"; // navigate after login
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const loginBtn = document.getElementById('loginBtn');
+
+        if (!username || !password) {
+            showError('Please enter both username and password');
+            return;
+        }
+
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Logging in...';
+
+        try {
+            const response = await fetch(`${API_URL}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Store user data in localStorage
+                localStorage.setItem('currentUser', JSON.stringify(data.user));
+                showSuccess('Login successful! Redirecting to User Dashboard...');
+                
+                // Redirect to user update page after 1 second
+                setTimeout(() => {
+                    window.location.href = 'user_update.html';
+                }, 1000);
+            } else {
+                showError(data.message || 'Invalid username or password');
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            showError('Connection error. Please ensure the server is running on port 3000.');
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Login';
+        }
     });
 
-    signupForm.addEventListener('submit', (e) => {
+    // USER SIGNUP
+    signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        window.location.href = "user_update.html"; // navigate after signup
+        const username = document.getElementById('newUsername').value.trim();
+        const password = document.getElementById('newPassword').value;
+        const signupBtn = document.getElementById('signupBtn');
+
+        if (!username || !password) {
+            showError('Please enter both username and password');
+            return;
+        }
+
+        if (username.length < 3) {
+            showError('Username must be at least 3 characters long');
+            return;
+        }
+
+        if (password.length < 4) {
+            showError('Password must be at least 4 characters long');
+            return;
+        }
+
+        signupBtn.disabled = true;
+        signupBtn.textContent = 'Signing up...';
+
+        try {
+            const response = await fetch(`${API_URL}/api/signup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showSuccess('Signup successful! Please login with your credentials.');
+                setTimeout(() => {
+                    activateLogin();
+                    document.getElementById('username').value = username;
+                }, 1500);
+            } else {
+                showError(data.message || 'Signup failed');
+            }
+        } catch (error) {
+            console.error('Signup error:', error);
+            showError('Connection error. Please ensure the server is running on port 3000.');
+        } finally {
+            signupBtn.disabled = false;
+            signupBtn.textContent = 'Sign Up';
+        }
     });
 
     activateLogin();

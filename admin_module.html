@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bonded Stores Management System</title>
+    <title>Admin Dashboard - Bonded Stores</title>
     <style>
-        /* Base Styles */
         * {
             margin: 0;
             padding: 0;
@@ -26,121 +25,7 @@
             padding: 0 15px;
         }
         
-        /* Auth Page Styles */
-        .auth-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #4285F4;
-        }
-        
-        .auth-box {
-            background-color: white;
-            padding: 2.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-        
-        .auth-box h1 {
-            color: #4285F4;
-            margin-bottom: 1.5rem;
-            font-size: 1.8rem;
-        }
-        
-        .auth-tabs {
-            display: flex;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .auth-tab {
-            flex: 1;
-            padding: 0.8rem;
-            cursor: pointer;
-            font-weight: 500;
-            color: #555;
-        }
-        
-        .auth-tab.active {
-            color: #4285F4;
-            border-bottom: 2px solid #4285F4;
-        }
-        
-        .auth-form {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .form-group {
-            margin-bottom: 1.2rem;
-            text-align: left;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #555;
-        }
-        
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: #4285F4;
-            outline: none;
-        }
-        
-        .auth-btn {
-            background-color: #FBBC05;
-            color: #202124;
-            border: none;
-            padding: 0.8rem;
-            border-radius: 4px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin-top: 0.5rem;
-        }
-        
-        .auth-btn:hover {
-            background-color: #F9AB00;
-        }
-        
-        .auth-switch {
-            margin-top: 1.5rem;
-            font-size: 0.9rem;
-            color: #555;
-        }
-        
-        .auth-switch a {
-            color: #4285F4;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .auth-switch a:hover {
-            text-decoration: underline;
-        }
-        
-        /* Dashboard Styles */
-        .dashboard {
-            display: none;
-        }
-        
+        /* Header */
         .header {
             background-color: #4285F4;
             color: white;
@@ -163,6 +48,10 @@
             display: flex;
             align-items: center;
             gap: 1rem;
+        }
+        
+        .user-name {
+            font-weight: 500;
         }
         
         .user-avatar {
@@ -192,7 +81,7 @@
             background-color: #F9AB00;
         }
         
-        /* Main Content Styles */
+        /* Main Content */
         .main-content {
             padding: 2rem 0;
         }
@@ -221,7 +110,7 @@
             0% { 
                 opacity: 1; 
                 transform: translateX(0); 
-                max-height: 200px; 
+                max-height: 300px; 
             }
             100% { 
                 opacity: 0; 
@@ -235,43 +124,69 @@
         .request-header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             margin-bottom: 1rem;
             padding-bottom: 0.5rem;
-            border-bottom: 1px solid #eee;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .request-header h3 {
+            color: #4285F4;
+            font-size: 1.2rem;
         }
         
         .request-details {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 1rem;
+            margin-bottom: 1rem;
         }
         
         .detail-item {
-            margin-bottom: 0.5rem;
+            padding: 0.5rem 0;
         }
         
         .detail-label {
-            font-weight: 500;
+            font-weight: 600;
             color: #555;
+            margin-bottom: 0.25rem;
+        }
+        
+        .detail-value {
+            color: #333;
+        }
+        
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: #FFF3CD;
+            color: #856404;
         }
         
         /* Approval Actions */
         .approval-actions {
             display: flex;
             gap: 10px;
-            margin-top: 10px;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
         }
         
         .action-btn {
-            background-color: #FBBC05;
-            color: #202124;
-            border: none;
             padding: 0.8rem 1.5rem;
+            border: none;
             border-radius: 4px;
             font-weight: 500;
             cursor: pointer;
             font-size: 1rem;
-            margin: 0.5rem;
+            transition: all 0.3s;
         }
         
         .approve-btn {
@@ -279,9 +194,17 @@
             color: white;
         }
         
+        .approve-btn:hover {
+            background-color: #2d8e47;
+        }
+        
         .reject-btn {
             background-color: #EA4335;
             color: white;
+        }
+        
+        .reject-btn:hover {
+            background-color: #d33b2c;
         }
         
         /* Modal Styles */
@@ -294,51 +217,94 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         .modal-content {
             background-color: white;
-            margin: 2% auto;
+            margin: 5% auto;
             padding: 2rem;
             border-radius: 8px;
             width: 90%;
-            max-width: 900px;
-            max-height: 90vh;
+            max-width: 600px;
+            max-height: 80vh;
             overflow-y: auto;
+            animation: slideDown 0.3s;
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #4285F4;
+        }
+        
+        .modal-header h2 {
+            color: #4285F4;
+            margin: 0;
         }
         
         .close {
             color: #aaa;
-            float: right;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
+            line-height: 1;
         }
         
         .close:hover {
             color: #000;
         }
         
-        .submit-btn {
-            background-color: #4285F4;
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 4px;
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
             font-weight: 500;
-            cursor: pointer;
-            font-size: 1rem;
-            margin-top: 1rem;
+            color: #555;
         }
         
-        .submit-btn:hover {
-            background-color: #3367d6;
-        }
-        
-        /* Signature Styles */
-        .signature-container {
-            margin-top: 2rem;
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
             border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #4285F4;
+            outline: none;
+        }
+        
+        /* Signature Canvas */
+        .signature-container {
+            margin: 1.5rem 0;
+            border: 2px solid #ddd;
             border-radius: 8px;
             padding: 1rem;
             background-color: #f9f9f9;
@@ -364,7 +330,7 @@
             display: flex;
             justify-content: center;
             gap: 1rem;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
         
         .signature-btn {
@@ -389,21 +355,43 @@
             background-color: #d33b2c;
         }
         
+        .submit-btn {
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background-color: #3367d6;
+        }
+        
+        .submit-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
         /* Loading indicator */
         .loading-indicator {
             display: none;
             text-align: center;
-            margin: 1rem 0;
+            margin: 2rem 0;
         }
         
         .loading-spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
             border-radius: 50%;
             border-top: 4px solid #4285F4;
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto;
+            margin: 0 auto 1rem;
         }
         
         @keyframes spin {
@@ -411,22 +399,23 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* Notification messages */
+        /* Notifications */
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 1rem;
+            padding: 1rem 1.5rem;
             border-radius: 4px;
             color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            z-index: 1000;
-            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 2000;
+            animation: slideInRight 0.3s ease-out;
+            min-width: 250px;
         }
         
-        @keyframes slideIn {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
         
         .notification.success {
@@ -437,226 +426,442 @@
             background-color: #EA4335;
         }
         
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .auth-box {
-                padding: 1.5rem;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .modal-content {
-                margin: 5% auto;
-                padding: 1rem;
-            }
-            
-            .components-table {
-                display: block;
-                overflow-x: auto;
-            }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
 <body>
-    <!-- Auth Page (Login/Signup) -->
-    <div class="auth-container" id="authPage">
-        <div class="auth-box">
-            <h1>Bonded Stores Admin Portal</h1>
-            
-            <div class="auth-tabs">
-                <div class="auth-tab active" id="loginTab">Login</div>
-                <div class="auth-tab" id="signupTab">Sign Up</div>
-            </div>
-            
-            <!-- Login Form -->
-            <form class="auth-form" id="loginForm" style="display: block;">
-                <div class="form-group">
-                    <label for="username">Admin Username</label>
-                    <input type="text" id="username" placeholder="Enter admin username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="Enter your password" required>
-                </div>
-                <button type="submit" class="auth-btn">Login</button>
-                
-                <div class="auth-switch">
-                    Don't have an admin account? <a href="#" id="showSignup">Sign up</a>
-                </div>
-            </form>
-            
-            <!-- Signup Form -->
-            <form class="auth-form" id="signupForm" style="display: none;">
-                <div class="form-group">
-                    <label for="newUsername">Admin Username</label>
-                    <input type="text" id="newUsername" placeholder="Choose an admin username" required>
-                </div>
-                <div class="form-group">
-                    <label for="newPassword">Password</label>
-                    <input type="password" id="newPassword" placeholder="Choose a password" required>
-                </div>
-                <div class="form-group">
-                    <label for="confirmPassword">Confirm Password</label>
-                    <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="Enter your email" required>
-                </div>
-                <div class="form-group">
-                    <label for="adminCode">Admin Access Code</label>
-                    <input type="text" id="adminCode" placeholder="Enter admin access code" required>
-                </div>
-                <button type="submit" class="auth-btn">Sign Up</button>
-                
-                <div class="auth-switch">
-                    Already have an admin account? <a href="#" id="showLogin">Login</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- Dashboard -->
-    <div class="dashboard" id="dashboard">
-        <header class="header">
-            <div class="container header-content">
-                <div class="logo">BMS Admin</div>
-                <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">A</div>
-                    <button class="logout-btn" id="logoutBtn">Logout</button>
-                </div>
+    <header class="header">
+        <div class="container header-content">
+            <div class="logo">BMS Admin Dashboard</div>
+            <div class="user-info">
+                <span class="user-name" id="userName">Welcome, Admin</span>
+                <div class="user-avatar" id="userAvatar">A</div>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
             </div>
-        </header>
-        <main class="main-content">
-            <div class="container">
-                <h1 class="page-title">Pending Requests</h1>
-                <div class="loading-indicator" id="loadingIndicator">
-                    <div class="loading-spinner"></div>
-                    <p>Processing request...</p>
-                </div>
-                <div id="pendingRequestsContainer">
-                    <!-- Requests will be loaded here -->
-                </div>
+        </div>
+    </header>
+    
+    <main class="main-content">
+        <div class="container">
+            <h1 class="page-title">Pending Requests for Approval</h1>
+            
+            <div class="loading-indicator" id="loadingIndicator">
+                <div class="loading-spinner"></div>
+                <p>Loading requests...</p>
             </div>
-        </main>
-    </div>
+            
+            <div id="pendingRequestsContainer">
+                <!-- Requests will be loaded here -->
+            </div>
+        </div>
+    </main>
 
     <!-- Approval Modal -->
     <div id="approvalModal" class="modal">
         <div class="modal-content">
-            <span class="close" id="approvalModalClose">&times;</span>
-            <h2>Approve Request</h2>
+            <div class="modal-header">
+                <h2>Approve Request</h2>
+                <span class="close" id="approvalModalClose">&times;</span>
+            </div>
+            
             <div id="approvalRequestDetails"></div>
+            
             <div class="signature-container">
                 <h3>Approval Signature</h3>
-                <canvas id="approvalSignatureCanvas" class="signature-canvas" width="400" height="150"></canvas>
+                <canvas id="approvalSignatureCanvas" class="signature-canvas" width="500" height="200"></canvas>
                 <div class="signature-buttons">
-                    <button type="button" class="signature-btn clear" onclick="clearSignature('approvalSignatureCanvas')">Clear</button>
-                    <button type="button" class="signature-btn" onclick="saveSignature('approvalSignatureCanvas')">Save Signature</button>
+                    <button type="button" class="signature-btn clear" onclick="clearSignature()">Clear Signature</button>
                 </div>
                 <p style="text-align: center; font-size: 0.9rem; color: #666;">Sign above using your mouse or touch</p>
             </div>
-            <div class="form-group" style="margin-top: 1rem;">
-                <label for="approverName">Your Name/Designation:</label>
-                <input type="text" id="approverName" required>
+            
+            <div class="form-group">
+                <label for="approverName">Your Name/Designation *</label>
+                <input type="text" id="approverName" placeholder="Enter your name or designation" required>
             </div>
-            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                <button type="button" class="submit-btn" id="confirmApproveBtn">Confirm Approval</button>
-                <button type="button" class="submit-btn reject-btn" id="rejectBtn">Reject Request</button>
-            </div>
+            
+            <button type="button" class="submit-btn" id="confirmApproveBtn">Confirm Approval</button>
         </div>
     </div>
 
     <!-- Rejection Modal -->
     <div id="rejectionModal" class="modal">
         <div class="modal-content">
-            <span class="close" id="rejectionModalClose">&times;</span>
-            <h2>Reject Request</h2>
-            <p>Please provide a reason for rejection:</p>
-            <textarea id="rejectionReason" rows="4" style="width: 100%; padding: 0.5rem;" required></textarea>
-            <button type="button" class="submit-btn reject-btn" id="confirmRejectBtn" style="margin-top: 1rem;">Confirm Rejection</button>
+            <div class="modal-header">
+                <h2>Reject Request</h2>
+                <span class="close" id="rejectionModalClose">&times;</span>
+            </div>
+            
+            <div id="rejectionRequestDetails"></div>
+            
+            <div class="form-group">
+                <label for="rejectionReason">Reason for Rejection *</label>
+                <textarea id="rejectionReason" rows="4" placeholder="Please provide a reason for rejection..." required></textarea>
+            </div>
+            
+            <button type="button" class="submit-btn reject-btn" id="confirmRejectBtn">Confirm Rejection</button>
         </div>
     </div>
 
-    <!-- Notification Messages -->
-    <div id="notificationContainer"></div>
-
     <script>
-        // DOM Elements
-        const authPage = document.getElementById('authPage');
-        const loginForm = document.getElementById('loginForm');
-        const signupForm = document.getElementById('signupForm');
-        const loginTab = document.getElementById('loginTab');
-        const signupTab = document.getElementById('signupTab');
-        const showSignup = document.getElementById('showSignup');
-        const showLogin = document.getElementById('showLogin');
+        const API_URL = 'http://localhost:3000';
         
-        const dashboard = document.getElementById('dashboard');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const userAvatar = document.getElementById('userAvatar');
+        // DOM Elements
         const pendingRequestsContainer = document.getElementById('pendingRequestsContainer');
         const approvalModal = document.getElementById('approvalModal');
-        const approvalRequestDetails = document.getElementById('approvalRequestDetails');
-        const confirmApproveBtn = document.getElementById('confirmApproveBtn');
-        const rejectBtn = document.getElementById('rejectBtn');
-        const approvalModalClose = document.getElementById('approvalModalClose');
         const rejectionModal = document.getElementById('rejectionModal');
-        const confirmRejectBtn = document.getElementById('confirmRejectBtn');
+        const approvalModalClose = document.getElementById('approvalModalClose');
         const rejectionModalClose = document.getElementById('rejectionModalClose');
+        const confirmApproveBtn = document.getElementById('confirmApproveBtn');
+        const confirmRejectBtn = document.getElementById('confirmRejectBtn');
         const loadingIndicator = document.getElementById('loadingIndicator');
-
-        let currentUser = null;
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        
         let currentRequestId = null;
         let currentRequestCard = null;
-        let signatures = {};
         let isDrawing = false;
         let lastX = 0;
         let lastY = 0;
 
-        // Toggle between login and signup forms
-        showSignup.addEventListener('click', function(e) {
-            e.preventDefault();
-            loginForm.style.display = 'none';
-            signupForm.style.display = 'block';
-            loginTab.classList.remove('active');
-            signupTab.classList.add('active');
+        // Check if user is logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            const adminUser = JSON.parse(localStorage.getItem('adminUser') || 'null');
+            if (adminUser && adminUser.name) {
+                userName.textContent = `Welcome, ${adminUser.name}`;
+                userAvatar.textContent = adminUser.name.charAt(0).toUpperCase();
+            }
+            loadPendingRequests();
         });
 
-        showLogin.addEventListener('click', function(e) {
-            e.preventDefault();
-            signupForm.style.display = 'none';
-            loginForm.style.display = 'block';
-            signupTab.classList.remove('active');
-            loginTab.classList.add('active');
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('adminUser');
+            window.location.href = 'login_admin.html';
         });
 
-        // Initialize signature canvas
+        // Notification system
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // Loading indicator
+        function showLoading(show) {
+            loadingIndicator.style.display = show ? 'block' : 'none';
+        }
+
+        // Load pending requests
+        async function loadPendingRequests() {
+            try {
+                showLoading(true);
+                console.log('Fetching pending requests from:', `${API_URL}/api/requests/pending`);
+                
+                const response = await fetch(`${API_URL}/api/requests/pending`);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Server error:', errorText);
+                    throw new Error(`Failed to load requests: ${response.status} ${response.statusText}`);
+                }
+                
+                const requests = await response.json();
+                console.log('Loaded requests:', requests);
+                renderRequests(requests);
+            } catch (error) {
+                console.error('Error loading requests:', error);
+                showNotification('Failed to load pending requests: ' + error.message, 'error');
+                pendingRequestsContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⚠️</div><p>Error loading requests. Check console for details.</p></div>';
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Render requests
+        function renderRequests(requests) {
+            pendingRequestsContainer.innerHTML = '';
+            
+            if (!requests || requests.length === 0) {
+                pendingRequestsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p>No pending requests found</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            requests.forEach(request => {
+                const requestCard = createRequestCard(request);
+                pendingRequestsContainer.appendChild(requestCard);
+            });
+        }
+
+        // Create request card
+        function createRequestCard(request) {
+            const card = document.createElement('div');
+            card.className = 'request-card';
+            
+            const requestType = request.Type === 'Stored Component' ? 'Storage' : 'Issue';
+            const requestId = request['Issue No'] || request['Storage No'] || request['Component ID'];
+            const issueNo = request['Issue No'] || '—';
+            const storageNo = request['Storage No'] || '—';
+            const issuedTo = request['Issued To'] || request['System Manager'] || '—';
+            const soNo = request['SO No'] || request['SO Number'] || '—';
+            
+            card.innerHTML = `
+                <div class="request-header">
+                    <h3>${requestType} Request</h3>
+                    <span class="status-badge status-pending">${request.Status || 'Pending'}</span>
+                </div>
+                <div class="request-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Request ID:</div>
+                        <div class="detail-value">${requestId}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Component Name:</div>
+                        <div class="detail-value">${request.Name || request['Part Description'] || '—'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">${requestType === 'Issue' ? 'Issue No:' : 'Storage No:'}</div>
+                        <div class="detail-value">${requestType === 'Issue' ? issueNo : storageNo}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">${requestType === 'Issue' ? 'Issued To:' : 'System Manager:'}</div>
+                        <div class="detail-value">${issuedTo}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">SO Number:</div>
+                        <div class="detail-value">${soNo}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Date:</div>
+                        <div class="detail-value">${request.Date || '—'}</div>
+                    </div>
+                </div>
+                <div class="approval-actions">
+                    <button class="action-btn approve-btn" onclick="showApprovalModal('${requestId}', this)">
+                        ✓ Approve Request
+                    </button>
+                    <button class="action-btn reject-btn" onclick="showRejectionModal('${requestId}', this)">
+                        ✗ Reject Request
+                    </button>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Show approval modal
+        function showApprovalModal(requestId, buttonElement) {
+            currentRequestId = requestId;
+            currentRequestCard = buttonElement.closest('.request-card');
+            
+            console.log('Opening approval modal for request:', requestId);
+            
+            document.getElementById('approvalRequestDetails').innerHTML = `
+                <div class="detail-item" style="margin-bottom: 1rem;">
+                    <div class="detail-label">Request ID:</div>
+                    <div class="detail-value" style="font-size: 1.2rem; color: #4285F4; font-weight: 600;">${requestId}</div>
+                </div>
+            `;
+            
+            document.getElementById('approverName').value = '';
+            approvalModal.style.display = 'block';
+            initSignatureCanvas();
+        }
+
+        // Show rejection modal
+        function showRejectionModal(requestId, buttonElement) {
+            currentRequestId = requestId;
+            currentRequestCard = buttonElement.closest('.request-card');
+            
+            console.log('Opening rejection modal for request:', requestId);
+            
+            document.getElementById('rejectionRequestDetails').innerHTML = `
+                <div class="detail-item" style="margin-bottom: 1rem;">
+                    <div class="detail-label">Request ID:</div>
+                    <div class="detail-value" style="font-size: 1.2rem; color: #EA4335; font-weight: 600;">${requestId}</div>
+                </div>
+            `;
+            
+            document.getElementById('rejectionReason').value = '';
+            rejectionModal.style.display = 'block';
+        }
+
+        // Close modals
+        approvalModalClose.onclick = () => approvalModal.style.display = 'none';
+        rejectionModalClose.onclick = () => rejectionModal.style.display = 'none';
+        
+        window.onclick = (event) => {
+            if (event.target === approvalModal) approvalModal.style.display = 'none';
+            if (event.target === rejectionModal) rejectionModal.style.display = 'none';
+        };
+
+        // Confirm Approval
+        confirmApproveBtn.addEventListener('click', async () => {
+            const approverName = document.getElementById('approverName').value.trim();
+            const canvas = document.getElementById('approvalSignatureCanvas');
+            const signature = canvas.toDataURL();
+            
+            if (!approverName) {
+                showNotification('Please enter your name/designation', 'error');
+                return;
+            }
+            
+            confirmApproveBtn.disabled = true;
+            confirmApproveBtn.textContent = 'Processing...';
+            
+            try {
+                console.log('Sending approval for request:', currentRequestId);
+                
+                const requestBody = {
+                    requestId: currentRequestId,
+                    approvalData: {
+                        approvedBy: approverName,
+                        signature: signature
+                    }
+                };
+                
+                console.log('Request body:', requestBody);
+                
+                const response = await fetch(`${API_URL}/api/requests/approve`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                const data = await response.json();
+                console.log('Server response:', data);
+                
+                if (response.ok && data.success) {
+                    showNotification(data.message || 'Request approved successfully!', 'success');
+                    approvalModal.style.display = 'none';
+                    removeRequestCard(currentRequestCard);
+                } else {
+                    throw new Error(data.error || 'Approval failed');
+                }
+            } catch (error) {
+                console.error('Approval error:', error);
+                showNotification(error.message || 'Failed to approve request', 'error');
+            } finally {
+                confirmApproveBtn.disabled = false;
+                confirmApproveBtn.textContent = 'Confirm Approval';
+            }
+        });
+
+        // Confirm Rejection
+        confirmRejectBtn.addEventListener('click', async () => {
+            const rejectionReason = document.getElementById('rejectionReason').value.trim();
+            
+            if (!rejectionReason) {
+                showNotification('Please provide a rejection reason', 'error');
+                return;
+            }
+            
+            confirmRejectBtn.disabled = true;
+            confirmRejectBtn.textContent = 'Processing...';
+            
+            try {
+                console.log('Sending rejection for request:', currentRequestId);
+                
+                const requestBody = {
+                    requestId: currentRequestId,
+                    rejectionReason: rejectionReason
+                };
+                
+                console.log('Request body:', requestBody);
+                
+                const response = await fetch(`${API_URL}/api/requests/reject`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                const data = await response.json();
+                console.log('Server response:', data);
+                
+                if (response.ok && data.success) {
+                    showNotification(data.message || 'Request rejected successfully', 'success');
+                    rejectionModal.style.display = 'none';
+                    removeRequestCard(currentRequestCard);
+                } else {
+                    throw new Error(data.error || 'Rejection failed');
+                }
+            } catch (error) {
+                console.error('Rejection error:', error);
+                showNotification(error.message || 'Failed to reject request', 'error');
+            } finally {
+                confirmRejectBtn.disabled = false;
+                confirmRejectBtn.textContent = 'Confirm Rejection';
+            }
+        });
+
+        // Remove request card with animation
+        function removeRequestCard(card) {
+            if (!card) return;
+            card.classList.add('removing');
+            setTimeout(() => {
+                card.remove();
+                if (!pendingRequestsContainer.querySelector('.request-card')) {
+                    pendingRequestsContainer.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✓</div>
+                            <p>All requests processed</p>
+                        </div>
+                    `;
+                }
+            }, 500);
+        }
+
+        // Signature canvas functions
         function initSignatureCanvas() {
             const canvas = document.getElementById('approvalSignatureCanvas');
             const ctx = canvas.getContext('2d');
             
-            // Set canvas background to white
+            // Clear and set white background
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Set drawing styles
+            // Drawing styles
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 2;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             
-            // Mouse/touch event handlers
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseout', stopDrawing);
+            // Remove old listeners
+            canvas.replaceWith(canvas.cloneNode(true));
+            const newCanvas = document.getElementById('approvalSignatureCanvas');
             
-            // Touch event handlers
-            canvas.addEventListener('touchstart', handleTouchStart);
-            canvas.addEventListener('touchmove', handleTouchMove);
-            canvas.addEventListener('touchend', stopDrawing);
+            // Mouse events
+            newCanvas.addEventListener('mousedown', startDrawing);
+            newCanvas.addEventListener('mousemove', draw);
+            newCanvas.addEventListener('mouseup', stopDrawing);
+            newCanvas.addEventListener('mouseout', stopDrawing);
+            
+            // Touch events
+            newCanvas.addEventListener('touchstart', handleTouch);
+            newCanvas.addEventListener('touchmove', handleTouch);
+            newCanvas.addEventListener('touchend', stopDrawing);
         }
         
         function startDrawing(e) {
@@ -667,357 +872,56 @@
             lastY = e.clientY - rect.top;
         }
         
-        function handleTouchStart(e) {
+        function handleTouch(e) {
             e.preventDefault();
             if (e.touches.length === 1) {
                 const touch = e.touches[0];
-                const mouseEvent = new MouseEvent('mousedown', {
-                    clientX: touch.clientX,
-                    clientY: touch.clientY
-                });
-                startDrawing(mouseEvent);
-            }
-        }
-        
-        function handleTouchMove(e) {
-            e.preventDefault();
-            if (e.touches.length === 1) {
-                const touch = e.touches[0];
-                const mouseEvent = new MouseEvent('mousemove', {
-                    clientX: touch.clientX,
-                    clientY: touch.clientY
-                });
-                draw(mouseEvent);
+                const canvas = document.getElementById('approvalSignatureCanvas');
+                const rect = canvas.getBoundingClientRect();
+                
+                if (e.type === 'touchstart') {
+                    isDrawing = true;
+                    lastX = touch.clientX - rect.left;
+                    lastY = touch.clientY - rect.top;
+                } else if (e.type === 'touchmove' && isDrawing) {
+                    const currentX = touch.clientX - rect.left;
+                    const currentY = touch.clientY - rect.top;
+                    drawLine(lastX, lastY, currentX, currentY);
+                    lastX = currentX;
+                    lastY = currentY;
+                }
             }
         }
         
         function draw(e) {
             if (!isDrawing) return;
             const canvas = document.getElementById('approvalSignatureCanvas');
-            const ctx = canvas.getContext('2d');
             const rect = canvas.getBoundingClientRect();
             const currentX = e.clientX - rect.left;
             const currentY = e.clientY - rect.top;
-            
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(currentX, currentY);
-            ctx.stroke();
-            
+            drawLine(lastX, lastY, currentX, currentY);
             lastX = currentX;
             lastY = currentY;
+        }
+        
+        function drawLine(x1, y1, x2, y2) {
+            const canvas = document.getElementById('approvalSignatureCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
         }
         
         function stopDrawing() {
             isDrawing = false;
         }
-
-        // Utility functions
-        function showNotification(message, type = 'success') {
-            const notificationContainer = document.getElementById('notificationContainer');
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
-            notificationContainer.appendChild(notification);
-            setTimeout(() => notification.remove(), 3000);
-        }
-        function showLoading(show) {
-            loadingIndicator.style.display = show ? 'block' : 'none';
-        }
-        function closeModal(modal) {
-            modal.style.display = 'none';
-        }
-        function openModal(modal) {
-            modal.style.display = 'block';
-        }
-
-        // Login form submission
-        loginForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            
-            try {
-                showLoading(true);
-                const response = await fetch('http://localhost:3000/api/admin/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success) {
-                        currentUser = { name: username };
-                        showDashboard();
-                        showNotification('Admin login successful!');
-                    } else {
-                        throw new Error(data.message || 'Invalid credentials');
-                    }
-                } else {
-                    const error = await response.json();
-                    throw new Error(error.message || response.statusText);
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                showNotification(error.message || 'Login failed', 'error');
-            } finally {
-                showLoading(false);
-            }
-        });
-
-        // Signup form submission
-        signupForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const username = document.getElementById('newUsername').value.trim();
-            const password = document.getElementById('newPassword').value.trim();
-            const confirmPassword = document.getElementById('confirmPassword').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const adminCode = document.getElementById('adminCode').value.trim();
-            
-            if (password !== confirmPassword) {
-                showNotification('Passwords do not match', 'error');
-                return;
-            }
-            
-            try {
-                showLoading(true);
-                const response = await fetch('http://localhost:3000/api/admin/signup', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password, email, adminCode })
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success) {
-                        showNotification('Admin account created successfully! Please login.');
-                        signupForm.reset();
-                        signupForm.style.display = 'none';
-                        loginForm.style.display = 'block';
-                        signupTab.classList.remove('active');
-                        loginTab.classList.add('active');
-                    } else {
-                        throw new Error(data.message || 'Error creating admin account');
-                    }
-                } else {
-                    const error = await response.json();
-                    throw new Error(error.message || response.statusText);
-                }
-            } catch (error) {
-                console.error('Signup error:', error);
-                showNotification(error.message || 'Signup failed', 'error');
-            } finally {
-                showLoading(false);
-            }
-        });
-
-        // Logout function
-        logoutBtn.addEventListener('click', function() {
-            authPage.style.display = 'flex';
-            dashboard.style.display = 'none';
-            loginForm.reset();
-            currentUser = null;
-            showNotification('Logged out successfully');
-        });
-
-        // Show dashboard
-        function showDashboard() {
-            authPage.style.display = 'none';
-            dashboard.style.display = 'block';
-            if (currentUser) {
-                userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
-            }
-            loadPendingRequests();
-        }
-
-        // Load pending requests
-        async function loadPendingRequests() {
-            try {
-                showLoading(true);
-                const response = await fetch('http://localhost:3000/api/requests/pending');
-                if (!response.ok) {
-                    throw new Error('Failed to load requests');
-                }
-                const requests = await response.json();
-                renderRequests(requests);
-            } catch (error) {
-                console.error('Error loading requests:', error);
-                showNotification(error.message || 'Failed to load pending requests', 'error');
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        // Render requests in the UI
-        function renderRequests(requests) {
-            pendingRequestsContainer.innerHTML = '';
-            if (requests.length === 0) {
-                pendingRequestsContainer.innerHTML = '<p>No pending requests found.</p>';
-                return;
-            }
-            requests.forEach(request => {
-                const requestCard = document.createElement('div');
-                requestCard.className = 'request-card';
-                const requestType = request.Type === 'Stored Component' ? 'Storage' : 'Issue';
-                const requestId = request['Issue No'] || request['Storage No'] || request['Component ID'];
-                requestCard.innerHTML = `
-                    <div class="request-header">
-                        <h3>${requestType} Request: ${requestId}</h3>
-                        <span>${request.Date}</span>
-                    </div>
-                    <div class="request-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Requested By:</div>
-                            <div>${request['Issued To'] || request['System Manager'] || '—'}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Status:</div>
-                            <div>${request['Status']}</div>
-                        </div>
-                    </div>
-                    <div class="approval-actions">
-                        <button class="action-btn approve-btn">Approve</button>
-                        <button class="action-btn reject-btn">Reject</button>
-                    </div>
-                `;
-                // Bind approve/reject actions on card
-                const approveBtn = requestCard.querySelector('.approve-btn');
-                const rejectBtn = requestCard.querySelector('.reject-btn');
-                approveBtn.addEventListener('click', function() {
-                    showApprovalModal(request, requestCard);
-                });
-                rejectBtn.addEventListener('click', function() {
-                    showRejectionModal(request, requestCard);
-                });
-                pendingRequestsContainer.appendChild(requestCard);
-            });
-        }
-
-        // Modal display logic
-        function showApprovalModal(request, card) {
-            currentRequestId = request['Component ID'] || request['Issue No'] || request['Storage No'];
-            currentRequestCard = card;
-            approvalRequestDetails.innerHTML = `
-                <p><strong>Request ID:</strong> ${currentRequestId}</p>
-                <p><strong>Name:</strong> ${request['Name'] || '-'}</p>
-                <p><strong>Type:</strong> ${request['Type'] || '-'}</p>
-            `;
-            openModal(approvalModal);
-            // Initialize signature canvas when modal opens
-            initSignatureCanvas();
-        }
-        function showRejectionModal(request, card) {
-            currentRequestId = request['Component ID'] || request['Issue No'] || request['Storage No'];
-            currentRequestCard = card;
-            document.getElementById('rejectionReason').value = '';
-            openModal(rejectionModal);
-        }
-        approvalModalClose.onclick = () => closeModal(approvalModal);
-        rejectionModalClose.onclick = () => closeModal(rejectionModal);
-
-        // Confirm Approve
-        confirmApproveBtn.addEventListener('click', async function() {
-            const approverName = document.getElementById('approverName').value.trim();
-            const signatureCanvas = document.getElementById('approvalSignatureCanvas');
-            const signature = signatureCanvas.toDataURL();
-            if (!approverName) {
-                showNotification('Approver name required', 'error');
-                return;
-            }
-            // Send API call
-            try {
-                showLoading(true);
-                const res = await fetch('http://localhost:3000/api/requests/approve', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        requestId: currentRequestId,
-                        approvalData: {
-                            approvedBy: approverName,
-                            signature
-                        }
-                    })
-                });
-                if (!res.ok) throw new Error('Approval failed');
-                showNotification('Request approved!');
-                // Animate removal
-                removeRequestCard(currentRequestCard);
-                closeModal(approvalModal);
-            } catch (err) {
-                showNotification('Approval failed', 'error');
-            } finally {
-                showLoading(false);
-            }
-        });
-
-        // Confirm Reject (from approval modal)
-        rejectBtn.addEventListener('click', () => {
-            closeModal(approvalModal);
-            openModal(rejectionModal);
-        });
-
-        // Confirm actual rejection (rejection modal)
-        confirmRejectBtn.addEventListener('click', async function() {
-            const rejectionReason = document.getElementById('rejectionReason').value.trim();
-            if (!rejectionReason) {
-                showNotification('Provide a rejection reason', 'error');
-                return;
-            }
-            try {
-                showLoading(true);
-                const res = await fetch('http://localhost:3000/api/requests/reject', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        requestId: currentRequestId,
-                        rejectionReason
-                    })
-                });
-                if (!res.ok) throw new Error('Rejection failed');
-                showNotification('Request rejected');
-                removeRequestCard(currentRequestCard);
-                closeModal(rejectionModal);
-            } catch (err) {
-                showNotification('Rejection failed', 'error');
-            } finally {
-                showLoading(false);
-            }
-        });
-
-        // Remove request card with slide-out animation
-        function removeRequestCard(card) {
-            if (!card) return;
-            card.classList.add('removing');
-            setTimeout(() => {
-                card.remove();
-                // If no cards left, show message
-                if (!pendingRequestsContainer.querySelector('.request-card')) {
-                    pendingRequestsContainer.innerHTML = '<p>No pending requests found.</p>';
-                }
-            }, 500); // Match your CSS keyframes duration
-        }
-
-        // Signature Pad functions
-        function clearSignature(canvasId) {
-            const canvas = document.getElementById(canvasId);
+        
+        function clearSignature() {
+            const canvas = document.getElementById('approvalSignatureCanvas');
             const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-        
-        function saveSignature(canvasId) {
-            const canvas = document.getElementById(canvasId);
-            const signatureData = canvas.toDataURL();
-            signatures[canvasId] = signatureData;
-            showNotification("Signature saved!", "success");
-        }
-
-        // Modal click outside to close
-        window.onclick = function(event) {
-            if (event.target === approvalModal) closeModal(approvalModal);
-            if (event.target === rejectionModal) closeModal(rejectionModal);
         }
     </script>
 </body>

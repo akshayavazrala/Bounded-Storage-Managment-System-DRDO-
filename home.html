@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bonded Stores Management System</title>
+    <style>
+        /* Base Styles */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Roboto', Arial, sans-serif; 
+        }
+        
+        body { 
+            background-color: #f5f5f5; 
+            color: #333; 
+            line-height: 1.6; 
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: #4285F4;
+            color: white;
+            padding: 1.5rem 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .intro-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 0 1rem;
+        }
+        
+        .intro-section h2 {
+            color: #4285F4;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+        
+        .intro-section p {
+            max-width: 800px;
+            margin: 0 auto 1.5rem;
+            font-size: 1.1rem;
+            color: #555;
+        }
+        
+        /* Cards Section */
+        .cards-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .login-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 2rem;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: #4285F4;
+        }
+        
+        .login-card h3 {
+            color: #4285F4;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .login-card p {
+            color: #555;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        
+        .card-btn {
+            display: inline-block;
+            background-color: #FBBC05;
+            color: #202124;
+            text-decoration: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .card-btn:hover {
+            background-color: #F9AB00;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: 3rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .cards-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .login-card {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <h1>Bonded Stores Management System</h1>
+    </header>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <section class="intro-section">
+            <p>Please select your login type to continue:</p>
+        </section>
+        
+        <section class="cards-container">
+            <!-- User Login Card -->
+            <div class="login-card">
+                <div class="card-icon">👤</div>
+                <h3>User Login</h3>
+                <p>Access the system as a regular user to manage daily operations, track inventory, and generate reports.</p>
+                <a href="login_user.html" class="card-btn">User Login</a>
+            </div>
+            
+            <!-- Admin Login Card -->
+            <div class="login-card">
+                <div class="card-icon">⚙️</div>
+                <h3>Admin Login</h3>
+                <p>Administrator access for system configuration, user management, and advanced reporting features.</p>
+                <a href="login_admin.html" class="card-btn">Admin Login</a>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
