@@ -359,9 +359,9 @@ app.post('/api/issue', async (req, res) => {
         const components = JSON.parse(req.body.components);
         const { issueNo, issueDate, requestText, issueTo, issueFor, systemManager, submittedBy } = req.body;
         
-        if (!issueNo || !issueDate || !issueTo || !components || components.length === 0) {
-            return res.status(400).json({ error: "Missing required fields" });
-        }
+        if (!components || components.length === 0) {
+    return res.status(400).json({ error: "At least one component is required" });
+}
         
         const newItems = [];
         
@@ -433,9 +433,9 @@ app.post('/api/storage', async (req, res) => {
         const currentData = loadExcelSync();
         const { storageNo, storageDate, soNumber, systemManager, components } = req.body;
         
-        if (!storageNo || !storageDate || !soNumber || !components || components.length === 0) {
-            return res.status(400).json({ error: "Missing required fields" });
-        }
+        if (!components || components.length === 0) {
+    return res.status(400).json({ error: "At least one component is required" });
+}
         
         const newItems = [];
         
@@ -636,6 +636,211 @@ app.post('/api/requests/reject', async (req, res) => {
     }
 });
 
+// Delete component endpoint - deletes all items with matching Issue No, Storage No, or Component ID
+app.delete('/api/components/:identifier', async (req, res) => {
+    try {
+        const identifier = req.params.identifier;
+        console.log('\n=== DELETE REQUEST ===');
+        console.log('Identifier:', identifier);
+        
+        const currentData = loadExcelSync();
+        console.log('Total items before delete:', currentData.length);
+        
+        // Find all items matching the identifier
+        const remainingData = currentData.filter(item => {
+            const issueNo = item['Issue No'] ? item['Issue No'].toString() : null;
+            const storageNo = item['Storage No'] ? item['Storage No'].toString() : null;
+            const componentId = item['Component ID'] ? item['Component ID'].toString() : null;
+            const id = identifier.toString();
+            
+            // Keep items that DON'T match
+            return !(issueNo === id || storageNo === id || componentId === id);
+        });
+        
+        const deletedCount = currentData.length - remainingData.length;
+        console.log('Items to delete:', deletedCount);
+        console.log('Items remaining:', remainingData.length);
+        
+        if (deletedCount === 0) {
+            console.log('ERROR: No matching items found');
+            return res.status(404).json({ 
+                success: false,
+                error: "Component not found" 
+            });
+        }
+        
+        console.log('Attempting to save to Excel...');
+        const success = saveToExcelSync(remainingData);
+        
+        if (success) {
+            console.log('SUCCESS: Components deleted from Excel');
+            res.json({ 
+                success: true, 
+                message: `Successfully deleted ${deletedCount} component(s)`,
+                itemsDeleted: deletedCount
+            });
+        } else {
+            console.log('ERROR: Failed to save to Excel');
+            res.status(500).json({ 
+                success: false,
+                error: "Failed to save changes to Excel file" 
+            });
+        }
+    } catch (error) {
+        console.error("ERROR in delete:", error);
+        console.error("Stack trace:", error.stack);
+        res.status(500).json({ 
+            success: false,
+            error: "Server error: " + error.message 
+        });
+    }
+});
+
+// Update component endpoint - handles both issue and storage updates with file uploads
+app.put('/api/components/:identifier', async (req, res) => {
+    try {
+        await ensureUploadDir();
+        const identifier = req.params.identifier;
+        console.log('\n=== UPDATE REQUEST ===');
+        console.log('Identifier:', identifier);
+        
+        const currentData = loadExcelSync();
+        
+        // Parse components from form data (if multipart) or JSON
+        let components, headerData;
+        
+        if (req.body.components) {
+            // Issue form data (multipart with possible PDFs)
+            components = JSON.parse(req.body.components);
+            headerData = {
+                issueNo: req.body.issueNo,
+                issueDate: req.body.issueDate,
+                requestText: req.body.requestType,
+                issueTo: req.body.issueTo,
+                issueFor: req.body.issueFor,
+                systemManager: req.body.systemManager,
+                submittedBy: req.body.submittedBy,
+                type: 'issue'
+            };
+        } else {
+            // Storage form data (JSON)
+            components = req.body.components;
+            headerData = {
+                storageNo: req.body.storageNo,
+                storageDate: req.body.storageDate,
+                soNumber: req.body.soNumber,
+                systemManager: req.body.systemManager,
+                submittedBy: req.body.submittedBy,
+                type: 'storage'
+            };
+        }
+        
+        // Remove old entries
+        const remainingData = currentData.filter(item => {
+            const issueNo = item['Issue No'] ? item['Issue No'].toString() : null;
+            const storageNo = item['Storage No'] ? item['Storage No'].toString() : null;
+            const componentId = item['Component ID'] ? item['Component ID'].toString() : null;
+            const id = identifier.toString();
+            
+            return !(issueNo === id || storageNo === id || componentId === id);
+        });
+        
+        console.log('Removed old entries:', currentData.length - remainingData.length);
+        
+        // Add updated entries
+        const newItems = [];
+        
+        if (headerData.type === 'issue') {
+            for (let i = 0; i < components.length; i++) {
+                const component = components[i];
+                
+                // Handle PDF file upload if exists
+                let pdfFileName = component.soPdf || null;
+                if (component.hasPdf && req.files && req.files[`soPdf_${component.pdfIndex}`]) {
+                    const pdfFile = req.files[`soPdf_${component.pdfIndex}`];
+                    const timestamp = Date.now();
+                    const sanitizedPartNo = component.partNo.replace(/[^a-zA-Z0-9]/g, '_');
+                    pdfFileName = `SO_${headerData.issueNo}_${sanitizedPartNo}_${timestamp}.pdf`;
+                    const pdfPath = path.join(UPLOAD_DIR, pdfFileName);
+                    
+                    await pdfFile.mv(pdfPath);
+                    pdfFileName = `/uploads/${pdfFileName}`;
+                }
+                
+                const newItem = {
+                    "Component ID": generateComponentId([...remainingData, ...newItems]),
+                    "Name": component.partDescription || "Issued Component",
+                    "Part No": component.partNo,
+                    "Part Description": component.partDescription,
+                    "Type": "Issued Component",
+                    "Status": "Pending",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Issued To": headerData.issueTo,
+                    "Issue No": headerData.issueNo,
+                    "Issue Date": component.issueDate || headerData.issueDate,
+                    "Request Text": headerData.requestText,
+                    "Issue For": headerData.issueFor,
+                    "System Manager": headerData.systemManager,
+                    "Serial No": component.serialNo,
+                    "S.No as per SO": component.snoSO,
+                    "Manufacturer": component.manufacturer,
+                    "Quality Grade": component.qualityGrade,
+                    "Sub System": component.subSystem,
+                    "Quantity Each": component.quantityEach,
+                    "Total Quantity": component.totalQuantity,
+                    "SO No": component.soNo,
+                    "SO PDF": pdfFileName,
+                    "Submitted By": headerData.submittedBy
+                };
+                newItems.push(newItem);
+            }
+        } else {
+            // Storage components
+            for (const component of components) {
+                const newItem = {
+                    "Component ID": generateComponentId([...remainingData, ...newItems]),
+                    "Name": component.partDescription || "Stored Component",
+                    "Part No": component.partNo,
+                    "Part Description": component.partDescription,
+                    "Type": "Stored Component",
+                    "Status": "Pending",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Storage No": headerData.storageNo,
+                    "Storage Date": headerData.storageDate,
+                    "SO Number": headerData.soNumber,
+                    "System Manager": headerData.systemManager,
+                    "Serial No": component.serialNo,
+                    "S.No as per PO": component.snoPO,
+                    "Grade": component.grade,
+                    "Storage Quantity": component.quantity,
+                    "Storage Temperature": component.storageTemp,
+                    "Relative Humidity": component.relativeHumidity,
+                    "Storage Data": component.storageData,
+                    "Delivery Date": component.deliveryDate,
+                    "SO No": headerData.soNumber
+                };
+                newItems.push(newItem);
+            }
+        }
+        
+        const updatedData = [...remainingData, ...newItems];
+        const success = saveToExcelSync(updatedData);
+        
+        if (success) {
+            res.json({ 
+                success: true, 
+                message: `Successfully updated ${newItems.length} component(s)`,
+                data: updatedData 
+            });
+        } else {
+            res.status(500).json({ error: "Failed to save updated data" });
+        }
+    } catch (error) {
+        console.error("Error updating component:", error);
+        res.status(500).json({ error: "Failed to update component: " + error.message });
+    }
+});
+
 // Archive File Endpoints
 
 // Get all archived files
@@ -648,15 +853,22 @@ app.get('/api/archive/files', async (req, res) => {
             const filePath = path.join(UPLOAD_DIR, filename);
             const stats = await fs.promises.stat(filePath);
             
+            // Parse filename: timestamp_scientist_desc_description.ext
+            const parts = filename.split('_');
+            const scientist = parts[1] || 'Unknown';
+            const descIndex = parts.indexOf('desc');
+            const description = descIndex > -1 ? 
+                parts.slice(descIndex + 1).join('_').split('.')[0].replace(/-/g, ' ') : 
+                'No description';
+            
             return {
                 id: `FILE-${filename.split('-')[0]}`,
                 name: filename,
+                scientist: scientist.replace(/-/g, ' '),
                 path: `/uploads/${filename}`,
                 size: stats.size,
                 uploadDate: stats.birthtime.toISOString(),
-                description: filename.includes('_desc_') ? 
-                    filename.split('_desc_')[1].split('.')[0].replace(/-/g, ' ') : 
-                    'No description'
+                description: description
             };
         }));
         
@@ -677,13 +889,14 @@ app.post('/api/archive/upload', async (req, res) => {
         }
         
         const file = req.files.file;
+        const scientistName = req.body.scientistName || 'Unknown';
         const description = req.body.description || '';
+        const sanitizedScientist = scientistName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
         const sanitizedDescription = description.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
         const fileExt = path.extname(file.name);
-        const fileNameBase = path.basename(file.name, fileExt);
         const timestamp = Date.now();
         
-        const newFileName = `${timestamp}_${fileNameBase}_desc_${sanitizedDescription}${fileExt}`;
+        const newFileName = `${timestamp}_${sanitizedScientist}_desc_${sanitizedDescription}${fileExt}`;
         const filePath = path.join(UPLOAD_DIR, newFileName);
         
         await file.mv(filePath);
@@ -692,6 +905,7 @@ app.post('/api/archive/upload', async (req, res) => {
             success: true, 
             message: "File uploaded successfully",
             filename: newFileName,
+            scientist: scientistName,
             path: `/uploads/${newFileName}`
         });
     } catch (error) {

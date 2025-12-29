@@ -628,18 +628,19 @@
                 <table class="components-table">
                     <thead>
                         <tr>
-                            <th>Component ID</th>
-                            <th>Name</th>
-                            <th>Type</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th>Issued To</th>
-                            <th>SO No.</th>
-                            <th>Issue Date</th>
-                            <th>Storage Temp</th>
-                            <th>Humidity</th>
-                            <th>Actions</th>
-                        </tr>
+    <th>Component ID</th>
+    <th>Name</th>
+    <th>Type</th>
+    <th>Status</th>
+    <th>Date</th>
+    <th>Issued To</th>
+    <th>SO No.</th>
+    <th>SO PDF</th>
+    <th>Issue Date</th>
+    <th>Storage Temp</th>
+    <th>Humidity</th>
+    <th>Actions</th>
+</tr>
                     </thead>
                     <tbody id="inventoryTableBody">
                         <!-- Data will be loaded here -->
@@ -708,11 +709,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="issueNo">ION No.:</label>
-                        <input type="text" id="issueNo" required>
+                        <input type="text" id="issueNo">
                     </div>
                     <div class="form-group">
                         <label for="issueDate">Date:</label>
-                        <input type="date" id="issueDate" required>
+                        <input type="date" id="issueDate">
                     </div>
                 </div>
                 
@@ -731,11 +732,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="issueTo">to (name/designation):</label>
-                        <input type="text" id="issueTo" required>
+                        <input type="text" id="issueTo">
                     </div>
                     <div class="form-group">
                         <label for="issueFor">for:</label>
-                        <select id="issueFor" required>
+                        <select id="issueFor">
                             <option value="">Choose the usage</option>
                             <option value="project-work">Project Work</option>
                             <option value="testing">Testing</option>
@@ -768,25 +769,26 @@
                                 
                             </th>
                             <th>SO No.</th>
-                            <th>SO (upload pdf)</th>
-                            <th>Issue date</th>
+                            <th>SO PDF</th>
+                            <th>Issue Date</th>
+                            <th>Storage Temp</th>
                         </tr>
                     </thead>
                     <tbody id="componentsTableBody">
                         <tr>
-                            <td><input type="text" name="sno[]" value="1" readonly></td>
-                            <td><input type="text" name="sno_so[]"></td>
-                            <td><input type="text" name="part_no[]" required></td>
-                            <td><input type="text" name="part_desc[]" required></td>
-                            <td><input type="text" name="manufacturer[]"></td>
-                            <td><input type="text" name="quality_grade[]"></td>
-                            <td><input type="text" name="sub_system[]"></td>
-                            <td><input type="number" name="quantity_each[]" min="1"></td>
-                            <td><input type="number" name="total_quantity[]" min="1" required></td>
-                            <td><input type="text" name="so_no[]"></td>
-                            <td><input type="file" name = "soPdf[]"accept="application/pdf"/></td>
-                            <td><input type="date" name="issue_date[]" required></td>
-                        </tr>
+    <td><input type="text" name="sno[]" value="1" readonly></td>
+    <td><input type="text" name="sno_so[]"></td>
+    <td><input type="text" name="part_no[]"></td>
+    <td><input type="text" name="part_desc[]"></td>
+    <td><input type="text" name="manufacturer[]"></td>
+    <td><input type="text" name="quality_grade[]"></td>
+    <td><input type="text" name="sub_system[]"></td>
+    <td><input type="number" name="quantity_each[]" min="0"></td>
+    <td><input type="number" name="total_quantity[]" min="0"></td>
+    <td><input type="text" name="so_no[]"></td>
+    <td><input type="file" name = "soPdf[]"accept="application/pdf"/></td>
+    <td><input type="date" name="issue_date[]"></td>
+</tr>
                     </tbody>
                 </table>
                 
@@ -836,18 +838,18 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="storageNo">ION No.:</label>
-                        <input type="text" id="storageNo" required>
+                        <input type="text" id="storageNo">
                     </div>
                     <div class="form-group">
                         <label for="storageDate">Date:</label>
-                        <input type="date" id="storageDate" required>
+                        <input type="date" id="storageDate">
                     </div>
                 </div>
                 
                 <div class="form-row-single">
                     <div class="form-group">
                         <label>Sub: Storage of Electromagnetic relays under SO No. ________</label>
-                        <input type="text" id="soNumber" placeholder="Enter SO Number" required>
+                        <input type="text" id="soNumber" placeholder="Enter SO Number">
                     </div>
                 </div>
                 
@@ -870,24 +872,24 @@
                     </thead>
                     <tbody id="storageTableBody">
                         <tr>
-                            <td><input type="text" name="storage_sno[]" value="1" readonly></td>
-                            <td><input type="text" name="sno_po[]"></td>
-                            <td><input type="text" name="storage_part_no[]" required></td>
-                            <td><input type="text" name="storage_part_desc[]" required></td>
-                            <td><input type="text" name="grade[]"></td>
-                            <td><input type="number" name="storage_quantity[]" min="1" required></td>
-                            <td><input type="text" name="storage_temp[]"></td>
-                            <td><input type="text" name="relative_humidity[]"></td>
-                            <td><input type="date" name="storage_data[]"></td>
-                            <td><input type="date" name="delivery_date[]"></td>
-                        </tr>
+    <td><input type="text" name="storage_sno[]" value="1" readonly></td>
+    <td><input type="text" name="sno_po[]"></td>
+    <td><input type="text" name="storage_part_no[]"></td>
+    <td><input type="text" name="storage_part_desc[]"></td>
+    <td><input type="text" name="grade[]"></td>
+    <td><input type="number" name="storage_quantity[]" min="0"></td>
+    <td><input type="text" name="storage_temp[]"></td>
+    <td><input type="text" name="relative_humidity[]"></td>
+    <td><input type="date" name="storage_data[]"></td>
+    <td><input type="date" name="delivery_date[]"></td>
+</tr>
                     </tbody>
                 </table>
                 
                 <div class="form-row-single" style="margin-top: 2rem;">
     <div class="form-group">
         <label for="storageSystemManager">(NAME)</label>
-        <input type="text" id="storageSystemManager" placeholder="System Manager PSE" required>
+        <input type="text" id="storageSystemManager" placeholder="System Manager PSE">
     </div>
 </div>
 
@@ -920,13 +922,17 @@
             <h3>Upload File</h3>
             <form id="uploadForm">
                 <div class="form-group">
-                    <label for="fileToUpload">Select file to upload:</label>
-                    <input type="file" id="fileToUpload" name="fileToUpload" required>
-                </div>
-                <div class="form-group">
-                    <label for="fileDescription">Description (optional):</label>
-                    <input type="text" id="fileDescription" name="fileDescription">
-                </div>
+    <label for="fileToUpload">Select file to upload:</label>
+    <input type="file" id="fileToUpload" name="fileToUpload" required>
+</div>
+<div class="form-group">
+    <label for="scientistName">Scientist Name:</label>
+    <input type="text" id="scientistName" name="scientistName" required>
+</div>
+<div class="form-group">
+    <label for="fileDescription">Description (optional):</label>
+    <input type="text" id="fileDescription" name="fileDescription">
+</div>
                 <button type="submit" class="submit-btn">Upload File</button>
             </form>
         </div>
@@ -957,12 +963,15 @@
         </div>
         
         <!-- View Section -->
-        <div id="viewSection" style="display:none;">
-            <h3>View Files</h3>
-            <ul class="file-list" id="viewFileList">
-                <!-- Files will be populated here -->
-            </ul>
-        </div>
+<div id="viewSection" style="display:none;">
+    <h3>View Files by Scientist</h3>
+    <div id="scientistList" style="margin-bottom:1rem;">
+        <!-- Scientist buttons will be populated here -->
+    </div>
+    <ul class="file-list" id="viewFileList">
+        <!-- Files will be populated here -->
+    </ul>
+</div>
     </div>
 </div>
 
@@ -1151,13 +1160,46 @@ function populateRenameFileList() {
     });
 }
 
-// Populate view file list
+// Populate view file list - grouped by scientist
 function populateViewFileList() {
+    const scientistList = document.getElementById('scientistList');
+    const viewFileList = document.getElementById('viewFileList');
+    
+    scientistList.innerHTML = '<button class="action-btn" onclick="showAllFiles()">Show All</button>';
     viewFileList.innerHTML = '';
+    
     if (files.length === 0) {
         viewFileList.innerHTML = '<li class="file-item">No files found</li>';
         return;
     }
+    
+    // Group files by scientist
+    const scientistGroups = {};
+    files.forEach(file => {
+        const scientist = file.scientist || 'Unknown';
+        if (!scientistGroups[scientist]) {
+            scientistGroups[scientist] = [];
+        }
+        scientistGroups[scientist].push(file);
+    });
+    
+    // Create scientist filter buttons
+    Object.keys(scientistGroups).sort().forEach(scientist => {
+        const btn = document.createElement('button');
+        btn.className = 'action-btn';
+        btn.textContent = `${scientist} (${scientistGroups[scientist].length})`;
+        btn.onclick = () => filterByScientist(scientist);
+        scientistList.appendChild(btn);
+    });
+    
+    // Show all files initially
+    showAllFiles();
+}
+
+// Show all files
+function showAllFiles() {
+    const viewFileList = document.getElementById('viewFileList');
+    viewFileList.innerHTML = '';
     
     files.forEach(file => {
         const li = document.createElement('li');
@@ -1165,6 +1207,38 @@ function populateViewFileList() {
         li.innerHTML = `
             <div>
                 <strong>${file.name}</strong>
+                <p><strong>Scientist:</strong> ${file.scientist || 'Unknown'}</p>
+                <p><strong>Description:</strong> ${file.description || 'No description'}</p>
+                <p>Size: ${(file.size / 1024).toFixed(2)} KB</p>
+                <small>Uploaded: ${new Date(file.uploadDate).toLocaleString()}</small>
+            </div>
+            <div class="file-actions">
+                <button class="file-action-btn" onclick="viewFile('${file.name}')">View</button>
+            </div>
+        `;
+        viewFileList.appendChild(li);
+    });
+}
+
+// Filter files by scientist
+function filterByScientist(scientist) {
+    const viewFileList = document.getElementById('viewFileList');
+    viewFileList.innerHTML = '';
+    
+    const filteredFiles = files.filter(f => (f.scientist || 'Unknown') === scientist);
+    
+    if (filteredFiles.length === 0) {
+        viewFileList.innerHTML = '<li class="file-item">No files found for this scientist</li>';
+        return;
+    }
+    
+    filteredFiles.forEach(file => {
+        const li = document.createElement('li');
+        li.className = 'file-item';
+        li.innerHTML = `
+            <div>
+                <strong>${file.name}</strong>
+                <p><strong>Description:</strong> ${file.description || 'No description'}</p>
                 <p>Size: ${(file.size / 1024).toFixed(2)} KB</p>
                 <small>Uploaded: ${new Date(file.uploadDate).toLocaleString()}</small>
             </div>
@@ -1243,11 +1317,13 @@ function viewFile(filename) {
 uploadForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     const fileInput = document.getElementById('fileToUpload');
+    const scientistName = document.getElementById('scientistName').value;
     const description = document.getElementById('fileDescription').value;
     
     if (fileInput.files.length > 0) {
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
+        formData.append('scientistName', scientistName);
         formData.append('description', description);
         
         try {
@@ -1327,19 +1403,19 @@ uploadForm.addEventListener('submit', async function(e) {
         componentRowCount++;
         const newRow = document.createElement('tr');
         newRow.innerHTML = `
-            <td><input type="text" name="sno[]" value="${componentRowCount}" readonly></td>
-            <td><input type="text" name="sno_so[]"></td>
-            <td><input type="text" name="part_no[]" required></td>
-            <td><input type="text" name="part_desc[]" required></td>
-            <td><input type="text" name="manufacturer[]"></td>
-            <td><input type="text" name="quality_grade[]"></td>
-            <td><input type="text" name="sub_system[]"></td>
-            <td><input type="number" name="quantity_each[]" min="1"></td>
-            <td><input type="number" name="total_quantity[]" min="1" required></td>
-            <td><input type="text" name="so_no[]"></td>
-            <td><input type="file" name="soPdf[]" accept="application/pdf"/></td>
-            <td><input type="date" name="issue_date[]" required></td>
-        `;
+    <td><input type="text" name="sno[]" value="${componentRowCount}" readonly></td>
+    <td><input type="text" name="sno_so[]"></td>
+    <td><input type="text" name="part_no[]"></td>
+    <td><input type="text" name="part_desc[]"></td>
+    <td><input type="text" name="manufacturer[]"></td>
+    <td><input type="text" name="quality_grade[]"></td>
+    <td><input type="text" name="sub_system[]"></td>
+    <td><input type="number" name="quantity_each[]" min="0"></td>
+    <td><input type="number" name="total_quantity[]" min="0"></td>
+    <td><input type="text" name="so_no[]"></td>
+    <td><input type="file" name="soPdf[]" accept="application/pdf"/></td>
+    <td><input type="date" name="issue_date[]"></td>
+`;
         componentsTableBody.appendChild(newRow);
     });
 
@@ -1348,17 +1424,17 @@ uploadForm.addEventListener('submit', async function(e) {
         storageRowCount++;
         const newRow = document.createElement('tr');
         newRow.innerHTML = `
-            <td><input type="text" name="storage_sno[]" value="${storageRowCount}" readonly></td>
-            <td><input type="text" name="sno_po[]"></td>
-            <td><input type="text" name="storage_part_no[]" required></td>
-            <td><input type="text" name="storage_part_desc[]" required></td>
-            <td><input type="text" name="grade[]"></td>
-            <td><input type="number" name="storage_quantity[]" min="1" required></td>
-            <td><input type="text" name="storage_temp[]"></td>
-            <td><input type="text" name="relative_humidity[]"></td>
-            <td><input type="date" name="storage_data[]"></td>
-            <td><input type="date" name="delivery_date[]"></td>
-        `;
+    <td><input type="text" name="storage_sno[]" value="${storageRowCount}" readonly></td>
+    <td><input type="text" name="sno_po[]"></td>
+    <td><input type="text" name="storage_part_no[]"></td>
+    <td><input type="text" name="storage_part_desc[]"></td>
+    <td><input type="text" name="grade[]"></td>
+    <td><input type="number" name="storage_quantity[]" min="0"></td>
+    <td><input type="text" name="storage_temp[]"></td>
+    <td><input type="text" name="relative_humidity[]"></td>
+    <td><input type="date" name="storage_data[]"></td>
+    <td><input type="date" name="delivery_date[]"></td>
+`;
         storageTableBody.appendChild(newRow);
     });
 
@@ -1369,10 +1445,10 @@ uploadForm.addEventListener('submit', async function(e) {
             <tr>
                 <td><input type="text" name="storage_sno[]" value="1" readonly></td>
                 <td><input type="text" name="sno_po[]"></td>
-                <td><input type="text" name="storage_part_no[]" required></td>
-                <td><input type="text" name="storage_part_desc[]" required></td>
+                <td><input type="text" name="storage_part_no[]"></td>
+                <td><input type="text" name="storage_part_desc[]"></td>
                 <td><input type="text" name="grade[]"></td>
-                <td><input type="number" name="storage_quantity[]" min="1" required></td>
+                <td><input type="number" name="storage_quantity[]" min="0"></td>
                 <td><input type="text" name="storage_temp[]"></td>
                 <td><input type="text" name="relative_humidity[]"></td>
                 <td><input type="date" name="storage_data[]"></td>
@@ -1388,16 +1464,16 @@ uploadForm.addEventListener('submit', async function(e) {
             <tr>
                 <td><input type="text" name="sno[]" value="1" readonly></td>
                 <td><input type="text" name="sno_so[]"></td>
-                <td><input type="text" name="part_no[]" required></td>
-                <td><input type="text" name="part_desc[]" required></td>
+                <td><input type="text" name="part_no[]"></td>
+                <td><input type="text" name="part_desc[]"></td>
                 <td><input type="text" name="manufacturer[]"></td>
                 <td><input type="text" name="quality_grade[]"></td>
                 <td><input type="text" name="sub_system[]"></td>
-                <td><input type="number" name="quantity_each[]" min="1"></td>
-                <td><input type="number" name="total_quantity[]" min="1" required></td>
+                <td><input type="number" name="quantity_each[]" min="0"></td>
+                <td><input type="number" name="total_quantity[]" min="0"></td>
                 <td><input type="text" name="so_no[]"></td>
                 <td><input type="file" name="soPdf[]" accept="application/pdf"/></td> 
-                <td><input type="date" name="issue_date[]" required></td>
+                <td><input type="date" name="issue_date[]"></td>
             </tr>
         `;
     }
@@ -1731,7 +1807,6 @@ async function loadInventory() {
 
 
     // Update table with data
-    // Update table with data
 function updateTable(data) {
     inventoryTableBody.innerHTML = '';
     data.forEach(item => {
@@ -1746,8 +1821,26 @@ function updateTable(data) {
             <td>${item.Date || item['Issue Date'] || '-'}</td>
             <td>${item['Issued To'] || '-'}</td>
             <td>${item['SO No'] || item['SO Number'] || '-'}</td>
-            <td>${item['Issue Date'] || '-'}</td>
         `;
+        
+        // Add SO PDF column with view/download link
+        const soPdfCell = document.createElement('td');
+        if (item['SO PDF']) {
+            soPdfCell.innerHTML = `
+                <a href="http://localhost:3000${item['SO PDF']}" target="_blank" 
+                   style="color: #4285F4; text-decoration: underline; cursor: pointer;">
+                    View PDF
+                </a>
+            `;
+        } else {
+            soPdfCell.textContent = '-';
+        }
+        row.appendChild(soPdfCell);
+        
+        // Add Issue Date column
+        const issueDateCell = document.createElement('td');
+        issueDateCell.textContent = item['Issue Date'] || '-';
+        row.appendChild(issueDateCell);
         
         // Add storage-specific fields
         const storageTempCell = document.createElement('td');
@@ -1758,17 +1851,17 @@ function updateTable(data) {
         humidityCell.textContent = item['Relative Humidity'] || '-';
         row.appendChild(humidityCell);
         
-        // Add action buttons cell - ONLY FOR PENDING STATUS
-        const actionsCell = document.createElement('td');
-        if (item.Status && item.Status.toLowerCase() === 'pending') {
-            actionsCell.innerHTML = `
-                <button class="file-action-btn" onclick="editComponent('${item['Component ID']}')">Edit</button>
-                <button class="file-action-btn delete" onclick="deleteComponent('${item['Component ID']}')">Delete</button>
-            `;
-        } else {
-            actionsCell.textContent = '-';
-        }
-        row.appendChild(actionsCell);
+        // Add action buttons cell - FOR PENDING STATUS
+const actionsCell = document.createElement('td');
+if (item.Status && item.Status.toString().toLowerCase() === 'pending') {
+    actionsCell.innerHTML = `
+        <button class="file-action-btn" onclick="editComponent('${item['Component ID']}', '${item['Issue No'] || item['Storage No'] || ''}')">Edit</button>
+        <button class="file-action-btn delete" onclick="deleteComponent('${item['Component ID']}', '${item['Issue No'] || item['Storage No'] || ''}')">Delete</button>
+    `;
+} else {
+    actionsCell.textContent = '-';
+}
+row.appendChild(actionsCell);
         
         inventoryTableBody.appendChild(row);
     });
@@ -1861,8 +1954,11 @@ async function populateIssueModal(component) {
             <td><input type="number" name="quantity_each[]" value="${comp['Quantity Each'] || 1}" min="1"></td>
             <td><input type="number" name="total_quantity[]" value="${comp['Total Quantity'] || 1}" min="1" required></td>
             <td><input type="text" name="so_no[]" value="${comp['SO No'] || ''}"></td>
-            <td><input type="file" name="soPdf[]" accept="application/pdf"/></td>
-            <td><input type="date" name="issue_date[]" value="${comp['Issue Date'] || ''}" required></td>
+<td>
+    ${comp['SO PDF'] ? `<a href="http://localhost:3000${comp['SO PDF']}" target="_blank" style="color:#4285F4;font-size:0.85rem;">Current PDF</a><br>` : ''}
+    <input type="file" name="soPdf[]" accept="application/pdf"/>
+</td>
+<td><input type="date" name="issue_date[]" value="${comp['Issue Date'] || ''}" required></td>
         `;
         componentsTableBody.appendChild(newRow);
     });
@@ -1919,19 +2015,21 @@ async function populateStorageModal(component) {
 }
 
 // Delete Component Function
-async function deleteComponent(componentId) {
-    if (!confirm('Are you sure you want to delete this component? This will delete all related entries.')) {
+async function deleteComponent(componentId, groupId) {
+    if (!confirm('Are you sure you want to delete this component? This will delete all related entries with the same Issue No/Storage No.')) {
         return;
     }
     
     try {
-        const response = await fetch(`http://localhost:3000/api/components/${componentId}`, {
+        // Delete by groupId (Issue No or Storage No) to remove all related entries
+        const deleteId = groupId || componentId;
+        const response = await fetch(`http://localhost:3000/api/components/${deleteId}`, {
             method: 'DELETE'
         });
         
         if (response.ok) {
             const result = await response.json();
-            alert(result.message || 'Component deleted successfully!');
+            alert(result.message || 'Component(s) deleted successfully!');
             await loadInventory();
         } else {
             const error = await response.json();
