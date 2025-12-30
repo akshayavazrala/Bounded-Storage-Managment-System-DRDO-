@@ -788,6 +788,7 @@
     <td><input type="text" name="so_no[]"></td>
     <td><input type="file" name = "soPdf[]"accept="application/pdf"/></td>
     <td><input type="date" name="issue_date[]"></td>
+    <td><input type="text" name="storage_temp[]"></td>
 </tr>
                     </tbody>
                 </table>
@@ -1415,6 +1416,7 @@ uploadForm.addEventListener('submit', async function(e) {
     <td><input type="text" name="so_no[]"></td>
     <td><input type="file" name="soPdf[]" accept="application/pdf"/></td>
     <td><input type="date" name="issue_date[]"></td>
+<td><input type="text" name="storage_temp[]"></td>
 `;
         componentsTableBody.appendChild(newRow);
     });
@@ -1474,7 +1476,8 @@ uploadForm.addEventListener('submit', async function(e) {
                 <td><input type="text" name="so_no[]"></td>
                 <td><input type="file" name="soPdf[]" accept="application/pdf"/></td> 
                 <td><input type="date" name="issue_date[]"></td>
-            </tr>
+<td><input type="text" name="storage_temp[]"></td>
+</tr>
         `;
     }
 
@@ -1959,6 +1962,7 @@ async function populateIssueModal(component) {
     <input type="file" name="soPdf[]" accept="application/pdf"/>
 </td>
 <td><input type="date" name="issue_date[]" value="${comp['Issue Date'] || ''}" required></td>
+<td><input type="text" name="storage_temp[]" value="${comp['Storage Temperature'] || ''}"></td>
         `;
         componentsTableBody.appendChild(newRow);
     });
