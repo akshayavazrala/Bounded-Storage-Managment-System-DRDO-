@@ -320,6 +320,33 @@ app.get('/api/inventory', async (req, res) => {
     }
 });
 
+// Get single component details by ID
+app.get('/api/components/:identifier', async (req, res) => {
+    try {
+        const identifier = req.params.identifier;
+        const currentData = loadExcelSync();
+        
+        // Find the component
+        const component = currentData.find(item => {
+            const issueNo = item['Issue No'] ? item['Issue No'].toString() : null;
+            const storageNo = item['Storage No'] ? item['Storage No'].toString() : null;
+            const componentId = item['Component ID'] ? item['Component ID'].toString() : null;
+            const id = identifier.toString();
+            
+            return issueNo === id || storageNo === id || componentId === id;
+        });
+        
+        if (!component) {
+            return res.status(404).json({ error: "Component not found" });
+        }
+        
+        res.json(component);
+    } catch (error) {
+        console.error("Error fetching component:", error);
+        res.status(500).json({ error: "Failed to load component" });
+    }
+});
+
 // Get pending requests for admin
 app.get('/api/requests/pending', async (req, res) => {
     try {
@@ -703,26 +730,29 @@ app.put('/api/components/:identifier', async (req, res) => {
         const identifier = req.params.identifier;
         console.log('\n=== UPDATE REQUEST ===');
         console.log('Identifier:', identifier);
+        console.log('Content-Type:', req.headers['content-type']);
         
         const currentData = loadExcelSync();
         
         // Parse components from form data (if multipart) or JSON
-        let components, headerData;
+        let components, headerData, isIssueForm = false;
         
-        if (req.body.components) {
+        // Check if this is multipart form data (Issue form with PDFs)
+        if (req.body.components && typeof req.body.components === 'string') {
             // Issue form data (multipart with possible PDFs)
+            isIssueForm = true;
             components = JSON.parse(req.body.components);
             headerData = {
                 issueNo: req.body.issueNo,
                 issueDate: req.body.issueDate,
-                requestText: req.body.requestType,
+                requestText: req.body.requestText,
                 issueTo: req.body.issueTo,
                 issueFor: req.body.issueFor,
                 systemManager: req.body.systemManager,
                 submittedBy: req.body.submittedBy,
                 type: 'issue'
             };
-        } else {
+        } else if (req.body.components && Array.isArray(req.body.components)) {
             // Storage form data (JSON)
             components = req.body.components;
             headerData = {
@@ -733,7 +763,12 @@ app.put('/api/components/:identifier', async (req, res) => {
                 submittedBy: req.body.submittedBy,
                 type: 'storage'
             };
+        } else {
+            return res.status(400).json({ error: "Invalid request format" });
         }
+        
+        console.log('Update type:', headerData.type);
+        console.log('Components to update:', components.length);
         
         // Remove old entries
         const remainingData = currentData.filter(item => {
@@ -755,7 +790,7 @@ app.put('/api/components/:identifier', async (req, res) => {
                 const component = components[i];
                 
                 // Handle PDF file upload if exists
-                let pdfFileName = component.soPdf || null;
+                let pdfFileName = null;
                 if (component.hasPdf && req.files && req.files[`soPdf_${component.pdfIndex}`]) {
                     const pdfFile = req.files[`soPdf_${component.pdfIndex}`];
                     const timestamp = Date.now();
@@ -765,6 +800,9 @@ app.put('/api/components/:identifier', async (req, res) => {
                     
                     await pdfFile.mv(pdfPath);
                     pdfFileName = `/uploads/${pdfFileName}`;
+                } else if (component.existingPdf) {
+                    // Keep existing PDF if no new one uploaded
+                    pdfFileName = component.existingPdf;
                 }
                 
                 const newItem = {
@@ -790,6 +828,7 @@ app.put('/api/components/:identifier', async (req, res) => {
                     "Total Quantity": component.totalQuantity,
                     "SO No": component.soNo,
                     "SO PDF": pdfFileName,
+                    "Storage Temperature": component.storageTemp,
                     "Submitted By": headerData.submittedBy
                 };
                 newItems.push(newItem);
@@ -827,12 +866,14 @@ app.put('/api/components/:identifier', async (req, res) => {
         const success = saveToExcelSync(updatedData);
         
         if (success) {
+            console.log('SUCCESS: Components updated');
             res.json({ 
                 success: true, 
                 message: `Successfully updated ${newItems.length} component(s)`,
                 data: updatedData 
             });
         } else {
+            console.log('ERROR: Failed to save');
             res.status(500).json({ error: "Failed to save updated data" });
         }
     } catch (error) {

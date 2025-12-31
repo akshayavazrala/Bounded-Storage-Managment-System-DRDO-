@@ -1522,10 +1522,15 @@ uploadForm.addEventListener('submit', async function(e) {
 
     // Issue form submission
 // Issue form submission with file upload support
+// Issue form submission with file upload support
 issueForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const formData = new FormData();
+    
+    // Check if we're in edit mode
+    const isEditMode = issueForm.dataset.editMode === 'true';
+    const editingId = issueForm.dataset.editingId;
     
     // Add header fields
     formData.append('issueNo', document.getElementById('issueNo').value);
@@ -1541,7 +1546,7 @@ issueForm.addEventListener('submit', async function(e) {
     const components = [];
     
     rows.forEach((row, index) => {
-        const inputs = row.querySelectorAll('input');
+        const inputs = row.querySelectorAll('input, select');
         if (inputs[2].value.trim()) { // Check if part number is filled
             const component = {
                 serialNo: inputs[0].value,
@@ -1554,7 +1559,8 @@ issueForm.addEventListener('submit', async function(e) {
                 quantityEach: inputs[7].value || 1,
                 totalQuantity: inputs[8].value,
                 soNo: inputs[9].value,
-                issueDate: inputs[11].value
+                issueDate: inputs[11].value,
+                storageTemp: inputs[12].value
             };
             
             // Handle PDF file upload
@@ -1563,30 +1569,42 @@ issueForm.addEventListener('submit', async function(e) {
                 formData.append(`soPdf_${index}`, fileInput.files[0]);
                 component.hasPdf = true;
                 component.pdfIndex = index;
+            } else if (isEditMode && fileInput.dataset.existingPdf) {
+                // Keep existing PDF if in edit mode and no new file
+                component.existingPdf = fileInput.dataset.existingPdf;
             }
             
             components.push(component);
         }
     });
     
+    if (components.length === 0) {
+        alert('Please add at least one component');
+        return;
+    }
+    
     // Add components as JSON string
     formData.append('components', JSON.stringify(components));
     
     try {
         let response;
-        const isEditMode = issueForm.dataset.editMode === 'true';
+        let url;
         
         if (isEditMode) {
-            const componentId = issueForm.dataset.editingId;
-            formData.append('editMode', 'true');
-            formData.append('componentId', componentId);
+            // UPDATE mode
+            url = `http://localhost:3000/api/components/${editingId}`;
+            response = await fetch(url, {
+                method: 'PUT',
+                body: formData
+            });
+        } else {
+            // CREATE mode
+            url = 'http://localhost:3000/api/issue';
+            response = await fetch(url, {
+                method: 'POST',
+                body: formData
+            });
         }
-        
-        // Send as multipart/form-data (no Content-Type header - browser sets it automatically)
-        response = await fetch('http://localhost:3000/api/issue', {
-            method: 'POST',
-            body: formData
-        });
         
         if (response.ok) {
             const result = await response.json();
@@ -1603,7 +1621,7 @@ issueForm.addEventListener('submit', async function(e) {
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Connection error. Please try again.');
+        alert('Connection error: ' + error.message);
     }
 });
 
@@ -1946,6 +1964,13 @@ async function populateIssueModal(component) {
     relatedComponents.forEach((comp, index) => {
         componentRowCount++;
         const newRow = document.createElement('tr');
+        
+        // Create file input with existing PDF info
+        const fileInputHTML = comp['SO PDF'] ? 
+            `<a href="http://localhost:3000${comp['SO PDF']}" target="_blank" style="color:#4285F4;font-size:0.85rem;display:block;margin-bottom:4px;">Current PDF</a>
+             <input type="file" name="soPdf[]" accept="application/pdf" data-existing-pdf="${comp['SO PDF']}"/>` :
+            `<input type="file" name="soPdf[]" accept="application/pdf"/>`;
+        
         newRow.innerHTML = `
             <td><input type="text" name="sno[]" value="${componentRowCount}" readonly></td>
             <td><input type="text" name="sno_so[]" value="${comp['S.No as per SO'] || ''}"></td>
@@ -1954,21 +1979,18 @@ async function populateIssueModal(component) {
             <td><input type="text" name="manufacturer[]" value="${comp['Manufacturer'] || ''}"></td>
             <td><input type="text" name="quality_grade[]" value="${comp['Quality Grade'] || ''}"></td>
             <td><input type="text" name="sub_system[]" value="${comp['Sub System'] || ''}"></td>
-            <td><input type="number" name="quantity_each[]" value="${comp['Quantity Each'] || 1}" min="1"></td>
-            <td><input type="number" name="total_quantity[]" value="${comp['Total Quantity'] || 1}" min="1" required></td>
+            <td><input type="number" name="quantity_each[]" value="${comp['Quantity Each'] || 1}" min="0"></td>
+            <td><input type="number" name="total_quantity[]" value="${comp['Total Quantity'] || 1}" min="0" required></td>
             <td><input type="text" name="so_no[]" value="${comp['SO No'] || ''}"></td>
-<td>
-    ${comp['SO PDF'] ? `<a href="http://localhost:3000${comp['SO PDF']}" target="_blank" style="color:#4285F4;font-size:0.85rem;">Current PDF</a><br>` : ''}
-    <input type="file" name="soPdf[]" accept="application/pdf"/>
-</td>
-<td><input type="date" name="issue_date[]" value="${comp['Issue Date'] || ''}" required></td>
-<td><input type="text" name="storage_temp[]" value="${comp['Storage Temperature'] || ''}"></td>
+            <td>${fileInputHTML}</td>
+            <td><input type="date" name="issue_date[]" value="${comp['Issue Date'] || ''}" required></td>
+            <td><input type="text" name="storage_temp[]" value="${comp['Storage Temperature'] || ''}"></td>
         `;
         componentsTableBody.appendChild(newRow);
     });
     
-    // Store the component ID for update
-    issueForm.dataset.editingId = component['Component ID'];
+    // Store the identifier for update (use Issue No for grouping)
+    issueForm.dataset.editingId = component['Issue No'];
     issueForm.dataset.editMode = 'true';
 }
 
