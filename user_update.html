@@ -919,24 +919,32 @@
         </div>
         
         <!-- Upload Section -->
-        <div id="uploadSection">
-            <h3>Upload File</h3>
-            <form id="uploadForm">
-                <div class="form-group">
-    <label for="fileToUpload">Select file to upload:</label>
-    <input type="file" id="fileToUpload" name="fileToUpload" required>
-</div>
-<div class="form-group">
-    <label for="scientistName">Scientist Name:</label>
-    <input type="text" id="scientistName" name="scientistName" required>
-</div>
-<div class="form-group">
-    <label for="fileDescription">Description (optional):</label>
-    <input type="text" id="fileDescription" name="fileDescription">
-</div>
-                <button type="submit" class="submit-btn">Upload File</button>
-            </form>
+<div id="uploadSection">
+    <h3>Upload File</h3>
+    <form id="uploadForm">
+        <div class="form-group">
+            <label for="fileToUpload">Select file to upload:</label>
+            <input type="file" id="fileToUpload" name="fileToUpload" required>
         </div>
+        <div class="form-group">
+            <label for="scientistName">Scientist Name:</label>
+            <input type="text" id="scientistName" name="scientistName" required>
+        </div>
+        <div class="form-group">
+            <label for="componentType">Component Type:</label>
+            <select id="componentType" name="componentType" required>
+                <option value="">Choose component type</option>
+                <option value="storage">Storage Component</option>
+                <option value="issue">Issue Component</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="fileDescription">Description (optional):</label>
+            <input type="text" id="fileDescription" name="fileDescription">
+        </div>
+        <button type="submit" class="submit-btn">Upload File</button>
+    </form>
+</div>
         
         <!-- Delete Section -->
         <div id="deleteSection" style="display:none;">
@@ -968,6 +976,9 @@
     <h3>View Files by Scientist</h3>
     <div id="scientistList" style="margin-bottom:1rem;">
         <!-- Scientist buttons will be populated here -->
+    </div>
+    <div id="componentTypeFilter" style="margin-bottom:1rem;display:none;">
+        <!-- Component type buttons will be populated here -->
     </div>
     <ul class="file-list" id="viewFileList">
         <!-- Files will be populated here -->
@@ -1164,9 +1175,12 @@ function populateRenameFileList() {
 // Populate view file list - grouped by scientist
 function populateViewFileList() {
     const scientistList = document.getElementById('scientistList');
+    const componentTypeFilter = document.getElementById('componentTypeFilter');
     const viewFileList = document.getElementById('viewFileList');
     
     scientistList.innerHTML = '<button class="action-btn" onclick="showAllFiles()">Show All</button>';
+    componentTypeFilter.innerHTML = '';
+    componentTypeFilter.style.display = 'none';
     viewFileList.innerHTML = '';
     
     if (files.length === 0) {
@@ -1199,31 +1213,18 @@ function populateViewFileList() {
 
 // Show all files
 function showAllFiles() {
-    const viewFileList = document.getElementById('viewFileList');
-    viewFileList.innerHTML = '';
-    
-    files.forEach(file => {
-        const li = document.createElement('li');
-        li.className = 'file-item';
-        li.innerHTML = `
-            <div>
-                <strong>${file.name}</strong>
-                <p><strong>Scientist:</strong> ${file.scientist || 'Unknown'}</p>
-                <p><strong>Description:</strong> ${file.description || 'No description'}</p>
-                <p>Size: ${(file.size / 1024).toFixed(2)} KB</p>
-                <small>Uploaded: ${new Date(file.uploadDate).toLocaleString()}</small>
-            </div>
-            <div class="file-actions">
-                <button class="file-action-btn" onclick="viewFile('${file.name}')">View</button>
-            </div>
-        `;
-        viewFileList.appendChild(li);
-    });
+    const componentTypeFilter = document.getElementById('componentTypeFilter');
+    componentTypeFilter.style.display = 'none';
+    displayFiles(files);
 }
 
 // Filter files by scientist
 function filterByScientist(scientist) {
+    const componentTypeFilter = document.getElementById('componentTypeFilter');
     const viewFileList = document.getElementById('viewFileList');
+    
+    componentTypeFilter.innerHTML = '';
+    componentTypeFilter.style.display = 'block';
     viewFileList.innerHTML = '';
     
     const filteredFiles = files.filter(f => (f.scientist || 'Unknown') === scientist);
@@ -1233,12 +1234,60 @@ function filterByScientist(scientist) {
         return;
     }
     
-    filteredFiles.forEach(file => {
+    // Count by component type
+    const storageCount = filteredFiles.filter(f => f.componentType === 'storage').length;
+    const issueCount = filteredFiles.filter(f => f.componentType === 'issue').length;
+    
+    // Create component type filter buttons
+    const btnStorage = document.createElement('button');
+    btnStorage.className = 'action-btn';
+    btnStorage.textContent = `Storage Components (${storageCount})`;
+    btnStorage.onclick = () => filterByComponentType(scientist, 'storage');
+    componentTypeFilter.appendChild(btnStorage);
+    
+    const btnIssue = document.createElement('button');
+    btnIssue.className = 'action-btn';
+    btnIssue.textContent = `Issue Components (${issueCount})`;
+    btnIssue.onclick = () => filterByComponentType(scientist, 'issue');
+    componentTypeFilter.appendChild(btnIssue);
+    
+    const btnAll = document.createElement('button');
+    btnAll.className = 'action-btn';
+    btnAll.textContent = `All Types (${filteredFiles.length})`;
+    btnAll.onclick = () => displayFiles(filteredFiles);
+    componentTypeFilter.appendChild(btnAll);
+    
+    // Display all files for this scientist initially
+    displayFiles(filteredFiles);
+}
+
+// Filter files by scientist and component type
+function filterByComponentType(scientist, componentType) {
+    const filteredFiles = files.filter(f => 
+        (f.scientist || 'Unknown') === scientist && 
+        f.componentType === componentType
+    );
+    displayFiles(filteredFiles);
+}
+
+// Display files in the list
+function displayFiles(filesToDisplay) {
+    const viewFileList = document.getElementById('viewFileList');
+    viewFileList.innerHTML = '';
+    
+    if (filesToDisplay.length === 0) {
+        viewFileList.innerHTML = '<li class="file-item">No files found</li>';
+        return;
+    }
+    
+    filesToDisplay.forEach(file => {
         const li = document.createElement('li');
         li.className = 'file-item';
         li.innerHTML = `
             <div>
                 <strong>${file.name}</strong>
+                <p><strong>Scientist:</strong> ${file.scientist || 'Unknown'}</p>
+                <p><strong>Component Type:</strong> ${file.componentType === 'storage' ? 'Storage Component' : file.componentType === 'issue' ? 'Issue Component' : 'Unknown'}</p>
                 <p><strong>Description:</strong> ${file.description || 'No description'}</p>
                 <p>Size: ${(file.size / 1024).toFixed(2)} KB</p>
                 <small>Uploaded: ${new Date(file.uploadDate).toLocaleString()}</small>
@@ -1319,12 +1368,14 @@ uploadForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     const fileInput = document.getElementById('fileToUpload');
     const scientistName = document.getElementById('scientistName').value;
+    const componentType = document.getElementById('componentType').value;
     const description = document.getElementById('fileDescription').value;
     
     if (fileInput.files.length > 0) {
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
         formData.append('scientistName', scientistName);
+        formData.append('componentType', componentType);
         formData.append('description', description);
         
         try {

@@ -894,23 +894,25 @@ app.get('/api/archive/files', async (req, res) => {
             const filePath = path.join(UPLOAD_DIR, filename);
             const stats = await fs.promises.stat(filePath);
             
-            // Parse filename: timestamp_scientist_desc_description.ext
-            const parts = filename.split('_');
-            const scientist = parts[1] || 'Unknown';
-            const descIndex = parts.indexOf('desc');
-            const description = descIndex > -1 ? 
-                parts.slice(descIndex + 1).join('_').split('.')[0].replace(/-/g, ' ') : 
-                'No description';
-            
-            return {
-                id: `FILE-${filename.split('-')[0]}`,
-                name: filename,
-                scientist: scientist.replace(/-/g, ' '),
-                path: `/uploads/${filename}`,
-                size: stats.size,
-                uploadDate: stats.birthtime.toISOString(),
-                description: description
-            };
+            // Parse filename: timestamp_scientist_componentType_desc_description.ext
+const parts = filename.split('_');
+const scientist = parts[1] || 'Unknown';
+const componentType = parts[2] || 'unknown';
+const descIndex = parts.indexOf('desc');
+const description = descIndex > -1 ? 
+    parts.slice(descIndex + 1).join('_').split('.')[0].replace(/-/g, ' ') : 
+    'No description';
+
+return {
+    id: `FILE-${filename.split('-')[0]}`,
+    name: filename,
+    scientist: scientist.replace(/-/g, ' '),
+    componentType: componentType,
+    path: `/uploads/${filename}`,
+    size: stats.size,
+    uploadDate: stats.birthtime.toISOString(),
+    description: description
+};
         }));
         
         res.json(fileDetails);
@@ -930,14 +932,15 @@ app.post('/api/archive/upload', async (req, res) => {
         }
         
         const file = req.files.file;
-        const scientistName = req.body.scientistName || 'Unknown';
-        const description = req.body.description || '';
-        const sanitizedScientist = scientistName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
-        const sanitizedDescription = description.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
-        const fileExt = path.extname(file.name);
-        const timestamp = Date.now();
-        
-        const newFileName = `${timestamp}_${sanitizedScientist}_desc_${sanitizedDescription}${fileExt}`;
+const scientistName = req.body.scientistName || 'Unknown';
+const componentType = req.body.componentType || 'unknown';
+const description = req.body.description || '';
+const sanitizedScientist = scientistName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+const sanitizedDescription = description.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+const fileExt = path.extname(file.name);
+const timestamp = Date.now();
+
+const newFileName = `${timestamp}_${sanitizedScientist}_${componentType}_desc_${sanitizedDescription}${fileExt}`;
         const filePath = path.join(UPLOAD_DIR, newFileName);
         
         await file.mv(filePath);
