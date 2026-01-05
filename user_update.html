@@ -939,6 +939,14 @@
             </select>
         </div>
         <div class="form-group">
+            <label for="modelType">Model Type:</label>
+            <select id="modelType" name="modelType" required>
+                <option value="">Choose model type</option>
+                <option value="EM">EM</option>
+                <option value="FM">FM</option>
+            </select>
+        </div>
+        <div class="form-group">
             <label for="fileDescription">Description (optional):</label>
             <input type="text" id="fileDescription" name="fileDescription">
         </div>
@@ -963,12 +971,31 @@
                 <!-- Files will be populated here -->
             </ul>
             <div id="renameFormContainer" style="display:none; margin-top:1rem;">
-                <div class="form-group">
-                    <label for="newFileName">New file name:</label>
-                    <input type="text" id="newFileName" required>
-                </div>
-                <button class="submit-btn" id="confirmRenameBtn">Rename File</button>
-            </div>
+    <h4>Edit File Details</h4>
+    <div class="form-group">
+        <label for="renameScientist">Scientist Name:</label>
+        <input type="text" id="renameScientist" required>
+    </div>
+    <div class="form-group">
+        <label for="renameComponentType">Component Type:</label>
+        <select id="renameComponentType" required>
+            <option value="storage">Storage Component</option>
+            <option value="issue">Issue Component</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="renameModelType">Model Type:</label>
+        <select id="renameModelType" required>
+            <option value="EM">EM</option>
+            <option value="FM">FM</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="renameDescription">Description:</label>
+        <input type="text" id="renameDescription">
+    </div>
+    <button class="submit-btn" id="confirmRenameBtn">Update File Details</button>
+</div>
         </div>
         
         <!-- View Section -->
@@ -1261,11 +1288,61 @@ function filterByScientist(scientist) {
     displayFiles(filteredFiles);
 }
 
-// Filter files by scientist and component type
+// Filter files by scientist and component type, then show model filter
 function filterByComponentType(scientist, componentType) {
+    const componentTypeFilter = document.getElementById('componentTypeFilter');
+    const viewFileList = document.getElementById('viewFileList');
+    
     const filteredFiles = files.filter(f => 
         (f.scientist || 'Unknown') === scientist && 
         f.componentType === componentType
+    );
+    
+    if (filteredFiles.length === 0) {
+        viewFileList.innerHTML = '<li class="file-item">No files found</li>';
+        return;
+    }
+    
+    // Clear and add model type filter buttons
+    componentTypeFilter.innerHTML = '';
+    
+    // Count by model type
+    const emCount = filteredFiles.filter(f => f.modelType === 'EM').length;
+    const fmCount = filteredFiles.filter(f => f.modelType === 'FM').length;
+    
+    const btnEM = document.createElement('button');
+    btnEM.className = 'action-btn';
+    btnEM.textContent = `EM (${emCount})`;
+    btnEM.onclick = () => filterByModel(scientist, componentType, 'EM');
+    componentTypeFilter.appendChild(btnEM);
+    
+    const btnFM = document.createElement('button');
+    btnFM.className = 'action-btn';
+    btnFM.textContent = `FM (${fmCount})`;
+    btnFM.onclick = () => filterByModel(scientist, componentType, 'FM');
+    componentTypeFilter.appendChild(btnFM);
+    
+    const btnAllModels = document.createElement('button');
+    btnAllModels.className = 'action-btn';
+    btnAllModels.textContent = `All Models (${filteredFiles.length})`;
+    btnAllModels.onclick = () => displayFiles(filteredFiles);
+    componentTypeFilter.appendChild(btnAllModels);
+    
+    const btnBack = document.createElement('button');
+    btnBack.className = 'action-btn';
+    btnBack.textContent = '← Back to Component Types';
+    btnBack.onclick = () => filterByScientist(scientist);
+    componentTypeFilter.appendChild(btnBack);
+    
+    displayFiles(filteredFiles);
+}
+
+// Filter by model type
+function filterByModel(scientist, componentType, modelType) {
+    const filteredFiles = files.filter(f => 
+        (f.scientist || 'Unknown') === scientist && 
+        f.componentType === componentType &&
+        f.modelType === modelType
     );
     displayFiles(filteredFiles);
 }
@@ -1288,6 +1365,7 @@ function displayFiles(filesToDisplay) {
                 <strong>${file.name}</strong>
                 <p><strong>Scientist:</strong> ${file.scientist || 'Unknown'}</p>
                 <p><strong>Component Type:</strong> ${file.componentType === 'storage' ? 'Storage Component' : file.componentType === 'issue' ? 'Issue Component' : 'Unknown'}</p>
+                <p><strong>Model Type:</strong> ${file.modelType === 'EM' ? 'EM' : file.modelType === 'FM' ? 'FM' : 'Unknown'}</p>
                 <p><strong>Description:</strong> ${file.description || 'No description'}</p>
                 <p>Size: ${(file.size / 1024).toFixed(2)} KB</p>
                 <small>Uploaded: ${new Date(file.uploadDate).toLocaleString()}</small>
@@ -1303,20 +1381,48 @@ function displayFiles(filesToDisplay) {
 // Start renaming a file
 function startRenameFile(filename) {
     selectedFileForRename = filename;
-    newFileName.value = filename;
+    
+    // Parse existing filename to extract details
+    const parts = filename.split('_');
+    const scientist = parts[1] ? parts[1].replace(/-/g, ' ') : 'Unknown';
+    const componentType = parts[2] || 'unknown';
+    const modelType = parts[3] || 'unknown';
+    const descIndex = parts.indexOf('desc');
+    const description = descIndex > -1 ? 
+        parts.slice(descIndex + 1).join('_').split('.')[0].replace(/-/g, ' ') : '';
+    
+    // Populate form fields
+    document.getElementById('renameScientist').value = scientist;
+    document.getElementById('renameComponentType').value = componentType;
+    document.getElementById('renameModelType').value = modelType;
+    document.getElementById('renameDescription').value = description;
+    
     renameFormContainer.style.display = 'block';
 }
 
 // Confirm rename
 confirmRenameBtn.addEventListener('click', async function() {
-    if (selectedFileForRename && newFileName.value.trim()) {
+    if (selectedFileForRename) {
+        const newScientist = document.getElementById('renameScientist').value.trim();
+        const newComponentType = document.getElementById('renameComponentType').value;
+        const newModelType = document.getElementById('renameModelType').value;
+        const newDescription = document.getElementById('renameDescription').value.trim();
+        
+        if (!newScientist || !newComponentType || !newModelType) {
+            alert('Please fill all required fields');
+            return;
+        }
+        
         try {
             const response = await fetch('http://localhost:3000/api/archive/rename', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     oldName: selectedFileForRename,
-                    newName: newFileName.value.trim()
+                    newScientist: newScientist,
+                    newComponentType: newComponentType,
+                    newModelType: newModelType,
+                    newDescription: newDescription
                 })
             });
             
@@ -1369,6 +1475,7 @@ uploadForm.addEventListener('submit', async function(e) {
     const fileInput = document.getElementById('fileToUpload');
     const scientistName = document.getElementById('scientistName').value;
     const componentType = document.getElementById('componentType').value;
+    const modelType = document.getElementById('modelType').value;
     const description = document.getElementById('fileDescription').value;
     
     if (fileInput.files.length > 0) {
@@ -1376,6 +1483,7 @@ uploadForm.addEventListener('submit', async function(e) {
         formData.append('file', fileInput.files[0]);
         formData.append('scientistName', scientistName);
         formData.append('componentType', componentType);
+        formData.append('modelType', modelType);
         formData.append('description', description);
         
         try {

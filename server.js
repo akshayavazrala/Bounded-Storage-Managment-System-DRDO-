@@ -898,6 +898,7 @@ app.get('/api/archive/files', async (req, res) => {
 const parts = filename.split('_');
 const scientist = parts[1] || 'Unknown';
 const componentType = parts[2] || 'unknown';
+const modelType = parts[3] || 'unknown';
 const descIndex = parts.indexOf('desc');
 const description = descIndex > -1 ? 
     parts.slice(descIndex + 1).join('_').split('.')[0].replace(/-/g, ' ') : 
@@ -908,6 +909,7 @@ return {
     name: filename,
     scientist: scientist.replace(/-/g, ' '),
     componentType: componentType,
+    modelType: modelType,
     path: `/uploads/${filename}`,
     size: stats.size,
     uploadDate: stats.birthtime.toISOString(),
@@ -934,24 +936,27 @@ app.post('/api/archive/upload', async (req, res) => {
         const file = req.files.file;
 const scientistName = req.body.scientistName || 'Unknown';
 const componentType = req.body.componentType || 'unknown';
+const modelType = req.body.modelType || 'unknown';
 const description = req.body.description || '';
 const sanitizedScientist = scientistName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
 const sanitizedDescription = description.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
 const fileExt = path.extname(file.name);
 const timestamp = Date.now();
 
-const newFileName = `${timestamp}_${sanitizedScientist}_${componentType}_desc_${sanitizedDescription}${fileExt}`;
+const newFileName = `${timestamp}_${sanitizedScientist}_${componentType}_${modelType}_desc_${sanitizedDescription}${fileExt}`;
         const filePath = path.join(UPLOAD_DIR, newFileName);
         
         await file.mv(filePath);
         
         res.json({ 
-            success: true, 
-            message: "File uploaded successfully",
-            filename: newFileName,
-            scientist: scientistName,
-            path: `/uploads/${newFileName}`
-        });
+    success: true, 
+    message: "File uploaded successfully",
+    filename: newFileName,
+    scientist: scientistName,
+    componentType: componentType,
+    modelType: modelType,
+    path: `/uploads/${newFileName}`
+});
     } catch (error) {
         console.error("Error uploading file:", error);
         res.status(500).json({ error: "Failed to upload file" });
@@ -979,23 +984,39 @@ app.delete('/api/archive/files/:filename', async (req, res) => {
 // Rename file in archive
 app.post('/api/archive/rename', async (req, res) => {
     try {
-        const { oldName, newName } = req.body;
+        const { oldName, newScientist, newComponentType, newModelType, newDescription } = req.body;
         const oldPath = path.join(UPLOAD_DIR, oldName);
-        const newPath = path.join(UPLOAD_DIR, newName);
         
         if (!fs.existsSync(oldPath)) {
             return res.status(404).json({ error: "File not found" });
         }
         
+        // Extract timestamp and extension from old filename
+        const parts = oldName.split('_');
+        const timestamp = parts[0];
+        const fileExt = path.extname(oldName);
+        
+        // Sanitize inputs
+        const sanitizedScientist = newScientist.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+        const sanitizedDescription = newDescription.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+        
+        // Build new filename
+        const newFileName = `${timestamp}_${sanitizedScientist}_${newComponentType}_${newModelType}_desc_${sanitizedDescription}${fileExt}`;
+        const newPath = path.join(UPLOAD_DIR, newFileName);
+        
         if (fs.existsSync(newPath)) {
-            return res.status(400).json({ error: "A file with that name already exists" });
+            return res.status(400).json({ error: "A file with those details already exists" });
         }
         
         await fs.promises.rename(oldPath, newPath);
-        res.json({ success: true, message: "File renamed successfully" });
+        res.json({ 
+            success: true, 
+            message: "File details updated successfully",
+            newFileName: newFileName
+        });
     } catch (error) {
         console.error("Error renaming file:", error);
-        res.status(500).json({ error: "Failed to rename file" });
+        res.status(500).json({ error: "Failed to update file details" });
     }
 });
 
