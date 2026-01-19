@@ -939,13 +939,14 @@
             </select>
         </div>
         <div class="form-group">
-            <label for="modelType">Model Type:</label>
-            <select id="modelType" name="modelType" required>
-                <option value="">Choose model type</option>
-                <option value="EM">EM</option>
-                <option value="FM">FM</option>
-            </select>
-        </div>
+    <label for="modelType">Model Type:</label>
+    <select id="modelType" name="modelType" required>
+        <option value="">Choose model type</option>
+        <option value="EM">EM</option>
+        <option value="FM">FM</option>
+        <option value="Others">Others</option>
+    </select>
+</div>
         <div class="form-group">
             <label for="fileDescription">Description (optional):</label>
             <input type="text" id="fileDescription" name="fileDescription">
@@ -984,12 +985,13 @@
         </select>
     </div>
     <div class="form-group">
-        <label for="renameModelType">Model Type:</label>
-        <select id="renameModelType" required>
-            <option value="EM">EM</option>
-            <option value="FM">FM</option>
-        </select>
-    </div>
+    <label for="renameModelType">Model Type:</label>
+    <select id="renameModelType" required>
+        <option value="EM">EM</option>
+        <option value="FM">FM</option>
+        <option value="Others">Others</option>
+    </select>
+</div>
     <div class="form-group">
         <label for="renameDescription">Description:</label>
         <input type="text" id="renameDescription">
@@ -1306,21 +1308,28 @@ function filterByComponentType(scientist, componentType) {
     // Clear and add model type filter buttons
     componentTypeFilter.innerHTML = '';
     
-    // Count by model type
-    const emCount = filteredFiles.filter(f => f.modelType === 'EM').length;
-    const fmCount = filteredFiles.filter(f => f.modelType === 'FM').length;
-    
-    const btnEM = document.createElement('button');
-    btnEM.className = 'action-btn';
-    btnEM.textContent = `EM (${emCount})`;
-    btnEM.onclick = () => filterByModel(scientist, componentType, 'EM');
-    componentTypeFilter.appendChild(btnEM);
-    
-    const btnFM = document.createElement('button');
-    btnFM.className = 'action-btn';
-    btnFM.textContent = `FM (${fmCount})`;
-    btnFM.onclick = () => filterByModel(scientist, componentType, 'FM');
-    componentTypeFilter.appendChild(btnFM);
+// Count by model type
+const emCount = filteredFiles.filter(f => f.modelType === 'EM').length;
+const fmCount = filteredFiles.filter(f => f.modelType === 'FM').length;
+const othersCount = filteredFiles.filter(f => f.modelType === 'Others').length;
+
+const btnEM = document.createElement('button');
+btnEM.className = 'action-btn';
+btnEM.textContent = `EM (${emCount})`;
+btnEM.onclick = () => filterByModel(scientist, componentType, 'EM');
+componentTypeFilter.appendChild(btnEM);
+
+const btnFM = document.createElement('button');
+btnFM.className = 'action-btn';
+btnFM.textContent = `FM (${fmCount})`;
+btnFM.onclick = () => filterByModel(scientist, componentType, 'FM');
+componentTypeFilter.appendChild(btnFM);
+
+const btnOthers = document.createElement('button');
+btnOthers.className = 'action-btn';
+btnOthers.textContent = `Others (${othersCount})`;
+btnOthers.onclick = () => filterByModel(scientist, componentType, 'Others');
+componentTypeFilter.appendChild(btnOthers);
     
     const btnAllModels = document.createElement('button');
     btnAllModels.className = 'action-btn';
@@ -1365,7 +1374,7 @@ function displayFiles(filesToDisplay) {
                 <strong>${file.name}</strong>
                 <p><strong>Scientist:</strong> ${file.scientist || 'Unknown'}</p>
                 <p><strong>Component Type:</strong> ${file.componentType === 'storage' ? 'Storage Component' : file.componentType === 'issue' ? 'Issue Component' : 'Unknown'}</p>
-                <p><strong>Model Type:</strong> ${file.modelType === 'EM' ? 'EM' : file.modelType === 'FM' ? 'FM' : 'Unknown'}</p>
+                <p><strong>Model Type:</strong> ${file.modelType === 'EM' ? 'EM' : file.modelType === 'FM' ? 'FM' : file.modelType === 'Others' ? 'Others' : 'Unknown'}</p>
                 <p><strong>Description:</strong> ${file.description || 'No description'}</p>
                 <p>Size: ${(file.size / 1024).toFixed(2)} KB</p>
                 <small>Uploaded: ${new Date(file.uploadDate).toLocaleString()}</small>
