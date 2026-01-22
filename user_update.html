@@ -721,9 +721,10 @@
                     <div class="form-group">
                         <label>It is requested that the following components be issued as </label>
                         <select id="modelSelect" onChange="updateColumnHeading()">
-                            <option value="">Choose the model (EM / FM)</option>
+                            <option value="">Choose the model (EM / FM / Others)</option>
                             <option value="FM">FM</option>
                             <option value="EM">EM</option>
+                            <option value="Others">Others</option>
                         </select>
                     </div>
                 </div>
@@ -2067,15 +2068,19 @@ row.appendChild(actionsCell);
         refreshInterval = setInterval(loadInventory, 5000);
     }
 
-    function updateColumnHeading(){
-        const model=document.getElementById("modelSelect").value;
-        const quantityHeader=document.getElementById("quantityHeader");
-        if(model==="FM"){
-            quantityHeader.textContent="Total quantity of FM";
-        }else{
-            quantityHeader.textContent="Total quantity of EM";
-        }
+   function updateColumnHeading(){
+    const model=document.getElementById("modelSelect").value;
+    const quantityHeader=document.getElementById("quantityHeader");
+    if(model==="FM"){
+        quantityHeader.textContent="Total quantity of FM";
+    }else if(model==="EM"){
+        quantityHeader.textContent="Total quantity of EM";
+    }else if(model==="Others"){
+        quantityHeader.textContent="Name the Other and Quantity (e.g., xyz-2)";
+    }else{
+        quantityHeader.textContent="Total quantity of";
     }
+}
 
     // Edit Component Function
 async function editComponent(componentId) {
